@@ -125,7 +125,6 @@
       object-position: center;
       opacity: 0.55;
       filter: contrast(1.1) brightness(0.85);
-      transition: opacity 0.35s ease;
     }
     .hero-fade {
       position: absolute;
@@ -467,6 +466,7 @@
       src="assets/loop-ascii.mp4"
       autoplay
       muted
+      loop
       playsinline
       poster=""
     ></video>
@@ -690,45 +690,6 @@
       </ul>
     </div>
   </footer>
-
-  <script>
-    (function () {
-      const v = document.querySelector('.hero-video');
-      if (!v) return;
-
-      const FADE = 0.35; // seconds — match CSS transition
-      let fading = false;
-
-      // Prefer reduced-motion: just hard-loop, no fade
-      const preferReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (preferReduce) {
-        v.loop = true;
-        return;
-      }
-
-      v.addEventListener('timeupdate', () => {
-        if (!v.duration || fading) return;
-        const remaining = v.duration - v.currentTime;
-        if (remaining < FADE) {
-          fading = true;
-          v.style.opacity = '0';
-        }
-      });
-
-      v.addEventListener('ended', () => {
-        v.currentTime = 0;
-        // restart playback first, then fade back in on next frame
-        const playPromise = v.play();
-        if (playPromise && typeof playPromise.then === 'function') {
-          playPromise.catch(() => {});
-        }
-        requestAnimationFrame(() => {
-          v.style.opacity = '0.55';
-          fading = false;
-        });
-      });
-    })();
-  </script>
 
 </body>
 </html>
