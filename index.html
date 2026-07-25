@@ -15,7 +15,7 @@
   <style>
     /* ── tokens ─────────────────────────────────────────── */
     :root {
-      --bg:          #06070a;
+      --bg:           #06070a;
       --bg-elevated: #0c0e14;
       --surface:     #10131c;
       --border:      #1c2333;
@@ -49,7 +49,7 @@
     a:hover { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
     a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 
-    /* ── grain overlay (matches the ascii texture) ─────── */
+    /* ── grain overlay ─────────────────────────────────── */
     body::before {
       content: "";
       position: fixed;
@@ -113,10 +113,10 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding-bottom: 4.5rem;
+      padding-bottom: 4rem;
       overflow: hidden;
     }
-    .hero-video {
+    .hero-img {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -130,7 +130,7 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(to bottom, rgba(6,7,10,0.15) 0%, rgba(6,7,10,0.55) 55%, var(--bg) 100%),
+        linear-gradient(to bottom, rgba(6,7,10,0.2) 0%, rgba(6,7,10,0.6) 55%, var(--bg) 100%),
         radial-gradient(ellipse 80% 60% at 50% 40%, transparent 30%, rgba(6,7,10,0.7) 100%);
       pointer-events: none;
     }
@@ -138,14 +138,59 @@
       position: relative;
       z-index: 2;
     }
+    .hero-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.1rem;
+    }
     .hero-eyebrow {
       font-family: var(--font-mono);
       font-size: 0.72rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--blue-bright);
-      margin-bottom: 1.1rem;
     }
+
+    /* ── partner badge ──────────────────────────────────── */
+    .partner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(16, 19, 28, 0.75);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      backdrop-filter: blur(8px);
+    }
+    .partner-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .partner-item:hover {
+      color: var(--white);
+      text-decoration: none;
+    }
+    .partner-item img {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .partner-cross {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+      user-select: none;
+    }
+
     .hero h1 {
       font-family: var(--font-mono);
       font-weight: 600;
@@ -378,35 +423,6 @@
     }
     .btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
-    /* ── partners ───────────────────────────────────────── */
-    .partners-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      align-items: center;
-      margin-top: 1.5rem;
-    }
-    .partner {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-      color: var(--text-muted);
-      transition: color 0.15s ease;
-    }
-    .partner:hover { color: var(--text); text-decoration: none; }
-    .partner img {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-    }
-    .partner-name {
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      letter-spacing: 0.03em;
-    }
-
     /* ── footer ─────────────────────────────────────────── */
     footer {
       border-top: 1px solid var(--border);
@@ -436,12 +452,6 @@
       color: var(--text-faint);
     }
     .footer-links a:hover { color: var(--text-muted); }
-
-    /* ── reduced motion ─────────────────────────────────── */
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .hero-video { animation: none; }
-    }
   </style>
 </head>
 <body>
@@ -461,18 +471,30 @@
 
   <!-- hero -->
   <header class="hero">
-    <video
-      class="hero-video"
-      src="assets/loop-ascii.mp4"
-      autoplay
-      muted
-      loop
-      playsinline
-      poster=""
-    ></video>
+    <img
+      class="hero-img"
+      src="https://cas-bridge.xethub.hf.co/xet-bridge-us/6a649f8026e14c1d571a6509/599ec2b8d54d68b91ff3b3e0f4fa035c58763802529166e6d0b9e593d99c80e3?Expires=1784990012&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9jYXMtYnJpZGdlLnhldGh1Yi5oZi5jby94ZXQtYnJpZGdlLXVzLzZhNjQ5ZjgwMjZlMTRjMWQ1NzFhNjUwOS81OTllYzJiOGQ1NGQ2OGI5MWZmM2IzZTBmNGZhMDM1YzU4NzYzODAyNTI5MTY2ZTZkMGI5ZTU5M2Q5OWM4MGUzKiIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc4NDk5MDAxMn19fV19&Signature=MEUCIE0HIU1BIuqypxztlkJidOVEgsESQCWxnqVwhZ8ksQILAiEApvMBQz%7EqtRnE4b1U5fTZHNVpzSGu1Pqvm4PG637eSk0_&Key-Pair-Id=K3EPXBYC3CKDRZ&response-content-type=image%2Fpng&X-Xet-Cas-Uid=6615494716917dfdc645c44e&response-content-disposition=inline%3B+filename*%3DUTF-8%27%27ascii-art-banner-nontext.png%3B+filename%3D%22ascii-art-banner-nontext.png%22%3B&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cas%2F20260725%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260725T133332Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=00c77dea2d75669210536d7a59171b716e4650672dcf7e7f5d972e3e5f7744fe"
+      alt="FWKV ASCII Art Banner"
+    />
     <div class="hero-fade"></div>
     <div class="wrap hero-content">
-      <p class="hero-eyebrow">Recurrent language models · 2026</p>
+      <div class="hero-top-row">
+        <p class="hero-eyebrow">Recurrent language models · 2026</p>
+        
+        <!-- Moved & Updated Partner Badge -->
+        <div class="partner-badge">
+          <a class="partner-item" href="https://huggingface.co/FWKV" target="_blank" rel="noopener">
+            <img src="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/sro4XOnALHB4GmjOLxiZC.png" alt="FWKV" />
+            <span>FWKV</span>
+          </a>
+          <span class="partner-cross">⨉</span>
+          <a class="partner-item" href="https://huggingface.co/bench-labs" target="_blank" rel="noopener">
+            <img src="https://cdn-avatars.huggingface.co/v1/production/uploads/6471b447a2b0a376b8b5e879/Vn-_-ktCQQkd76Z4BuLuW.png" alt="Bench Labs" />
+            <span>Bench Labs</span>
+          </a>
+        </div>
+      </div>
+
       <h1>FWKV</h1>
       <p class="hero-tagline">Simplicity is all you need.</p>
       <div class="hero-meta">
@@ -652,24 +674,6 @@
           </div>
           <a class="btn" href="https://flamef0x.github.io/papers/" target="_blank" rel="noopener">
             Read the paper →
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- partners -->
-    <section id="partners">
-      <div class="wrap">
-        <p class="section-label">With</p>
-        <div class="partners-row">
-          <a class="partner" href="https://huggingface.co/bench-labs" target="_blank" rel="noopener">
-            <img
-              src="https://cdn-avatars.huggingface.co/v1/production/uploads/6471b447a2b0a376b8b5e879/Vn-_-ktCQQkd76Z4BuLuW.png"
-              alt="Bench Labs"
-              width="36"
-              height="36"
-            />
-            <span class="partner-name">Bench Labs</span>
           </a>
         </div>
       </div>
