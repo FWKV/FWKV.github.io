@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FWKV — Simplicity Is All You Need</title>
+  <meta name="description" content="FWKV is a simple, efficient recurrent language model architecture. Fixed-decay recurrence + ROSA copy mechanism. Fast on CPU. Open source." />
+  <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/sro4XOnALHB4GmjOLxiZC.png" type="image/png" />
+
+  <!-- Fonts: technical mono + quiet humanistic sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── tokens ─────────────────────────────────────────── */
+    :root {
+      --bg:          #06070a;
+      --bg-elevated: #0c0e14;
+      --surface:     #10131c;
+      --border:      #1c2333;
+      --blue-dim:    #1a3a5c;
+      --blue:        #3d7ab5;
+      --blue-bright: #6ba8e0;
+      --cyan:        #8ec8f0;
+      --text:        #d8e0ec;
+      --text-muted:  #7a8ba0;
+      --text-faint:  #4a5a6e;
+      --white:       #f0f4fa;
+      --radius:      2px;
+      --font-mono:   "IBM Plex Mono", ui-monospace, monospace;
+      --font-sans:   "IBM Plex Sans", system-ui, sans-serif;
+    }
+
+    /* ── reset ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img, video { display: block; max-width: 100%; }
+    a { color: var(--blue-bright); text-decoration: none; }
+    a:hover { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+    /* ── grain overlay (matches the ascii texture) ─────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── layout shell ───────────────────────────────────── */
+    .wrap {
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+
+    /* ── nav ────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6, 7, 10, 0.82);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo:hover { color: var(--cyan); text-decoration: none; }
+    .nav-links {
+      display: flex;
+      gap: 1.6rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── hero ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 4.5rem;
+      overflow: hidden;
+    }
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0.55;
+      filter: contrast(1.1) brightness(0.85);
+    }
+    .hero-fade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(6,7,10,0.15) 0%, rgba(6,7,10,0.55) 55%, var(--bg) 100%),
+        radial-gradient(ellipse 80% 60% at 50% 40%, transparent 30%, rgba(6,7,10,0.7) 100%);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue-bright);
+      margin-bottom: 1.1rem;
+    }
+    .hero h1 {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: clamp(3.2rem, 9vw, 5.6rem);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      margin-bottom: 0.6rem;
+    }
+    .hero-tagline {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+      color: var(--text-muted);
+      max-width: 28ch;
+      margin-bottom: 2.4rem;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+    .hero-meta span strong {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ── sections ───────────────────────────────────────── */
+    section {
+      padding: 4.5rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 1.4rem;
+    }
+    h2 {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: clamp(1.35rem, 3vw, 1.7rem);
+      color: var(--white);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.3rem;
+      line-height: 1.3;
+    }
+    p {
+      color: var(--text-muted);
+      max-width: 62ch;
+      margin-bottom: 1.1rem;
+    }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── about ──────────────────────────────────────────── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+    @media (min-width: 700px) {
+      .about-grid {
+        grid-template-columns: 1.4fr 1fr;
+        gap: 3.5rem;
+        align-items: start;
+      }
+    }
+    .stat-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.4rem 1.5rem;
+    }
+    .stat-block + .stat-block { margin-top: 0.75rem; }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 1.65rem;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-faint);
+      margin-top: 0.25rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── why ────────────────────────────────────────────── */
+    .why-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+      margin-top: 1.8rem;
+    }
+    .why-item {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    .why-key {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: var(--blue-bright);
+      padding-top: 0.15rem;
+    }
+    .why-body {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .why-body strong { color: var(--text); font-weight: 500; }
+
+    /* ── models ─────────────────────────────────────────── */
+    .models-intro {
+      margin-bottom: 2rem;
+    }
+    .model-group {
+      margin-bottom: 2.4rem;
+    }
+    .model-group:last-child { margin-bottom: 0; }
+    .model-group-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .model-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+    }
+    .model-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: baseline;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid rgba(28, 35, 51, 0.7);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s ease;
+    }
+    .model-row:last-child { border-bottom: none; }
+    a.model-row:hover {
+      background: rgba(26, 58, 92, 0.18);
+      text-decoration: none;
+    }
+    a.model-row:hover .model-name { color: var(--cyan); }
+    .model-name {
+      font-family: var(--font-mono);
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .model-status {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+    .model-status.live { color: var(--blue-bright); }
+    .model-status.planned { color: var(--text-faint); }
+    .model-status.nap { color: var(--text-faint); opacity: 0.7; }
+
+    /* ── paper ──────────────────────────────────────────── */
+    .paper-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.8rem 1.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    @media (min-width: 600px) {
+      .paper-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+      }
+    }
+    .paper-title {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--white);
+      margin-bottom: 0.35rem;
+    }
+    .paper-meta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--bg);
+      background: var(--blue-bright);
+      border: none;
+      padding: 0.65rem 1.15rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: var(--cyan);
+      color: var(--bg);
+      text-decoration: none;
+    }
+    .btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+    /* ── partners ───────────────────────────────────────── */
+    .partners-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    .partner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-muted);
+      transition: color 0.15s ease;
+    }
+    .partner:hover { color: var(--text); text-decoration: none; }
+    .partner img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+    .partner-name {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── footer ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0 3.5rem;
+    }
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    .footer-brand {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      line-height: 1.7;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+    }
+    .footer-links a:hover { color: var(--text-muted); }
+
+    /* ── reduced motion ─────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .hero-video { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">FWKV</a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#paper">Paper</a></li>
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Hugging Face</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- hero -->
+  <header class="hero">
+    <video
+      class="hero-video"
+      src="assets/loop-ascii.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      poster=""
+    ></video>
+    <div class="hero-fade"></div>
+    <div class="wrap hero-content">
+      <p class="hero-eyebrow">Recurrent language models · 2026</p>
+      <h1>FWKV</h1>
+      <p class="hero-tagline">Simplicity is all you need.</p>
+      <div class="hero-meta">
+        <span><strong>48.1 tok/s</strong> on a 2-vCPU instance</span>
+        <span><strong>~56M</strong> parameters (ROSA)</span>
+        <span><strong>Apache 2.0</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- what is it -->
+    <section id="about">
+      <div class="wrap about-grid">
+        <div>
+          <p class="section-label">What it is</p>
+          <h2>A fixed-decay recurrent core.<br />Nothing more complicated than that.</h2>
+          <p>
+            FWKV (Feed-forward Weighted Key Value) is a small recurrent language model architecture
+            proposed in May 2026 by
+            <a href="https://huggingface.co/FlameF0X" target="_blank" rel="noopener">FlameF0X</a>.
+            It began as a side project inspired by RWKV, then turned into something faster
+            than any dense or MoE Transformer of similar size on ordinary CPUs.
+          </p>
+          <p>
+            The recurrence is a single accumulated state with a learned, constant per-channel decay —
+            computed by a standard parallel scan. No pairwise time-mixing, no data-dependent gates,
+            no custom CUDA kernels. The ROSA variant adds an exact, training-free suffix-automaton
+            copy signal so the model can reuse long-range patterns without attention.
+          </p>
+          <p>
+            It is still early and unstable. Use it if you care about simplicity and CPU speed;
+            skip it if you need a production chat model tomorrow.
+          </p>
+        </div>
+        <aside>
+          <div class="stat-block">
+            <div class="stat-value">48.1</div>
+            <div class="stat-label">tokens / sec · 2 vCPU, 16 GB RAM</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-value">O(log T)</div>
+            <div class="stat-label">parallel scan · pure PyTorch</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-value">no KV cache</div>
+            <div class="stat-label">constant state size per layer</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- why -->
+    <section id="why">
+      <div class="wrap">
+        <p class="section-label">Why it exists</p>
+        <h2>Speed from constraints, not from kernels.</h2>
+        <ul class="why-list">
+          <li class="why-item">
+            <span class="why-key">Decay</span>
+            <span class="why-body">
+              <strong>Fixed per-channel W.</strong>
+              The decay is learned once and constant at inference.
+              That single choice lets the whole history collapse into a vectorized Hillis-Steele scan.
+            </span>
+          </li>
+          <li class="why-item">
+            <span class="why-key">ROSA</span>
+            <span class="why-body">
+              <strong>Exact causal copy.</strong>
+              A suffix automaton answers “what followed this longest prior match?”
+              and injects the answer as an embedding. No attention, no parameters for the predictor itself.
+            </span>
+          </li>
+          <li class="why-item">
+            <span class="why-key">Size</span>
+            <span class="why-body">
+              <strong>Factorized embeddings.</strong>
+              Vocab projects through a 128-d bottleneck instead of a full d_model matrix.
+              Fewer parameters, cheaper logits, still tied input/output weights.
+            </span>
+          </li>
+          <li class="why-item">
+            <span class="why-key">Honest</span>
+            <span class="why-body">
+              <strong>It is not ready for everything.</strong>
+              At 50–56M parameters the model confabulates freely.
+              The point of the release is the architecture and the measured CPU throughput, not a claim of intelligence.
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- models -->
+    <section id="models">
+      <div class="wrap">
+        <p class="section-label">Models</p>
+        <h2>Named simply so you can find them.</h2>
+        <p class="models-intro">
+          Pattern: <code style="font-family:var(--font-mono);color:var(--blue-bright);font-size:0.9em">FWKV-[size or type]</code>.
+          Everything lives under the
+          <a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">FWKV</a> organization on Hugging Face.
+        </p>
+
+        <div class="model-group">
+          <p class="model-group-title">Language models</p>
+          <ul class="model-list">
+            <li>
+              <a class="model-row" href="https://huggingface.co/FlameF0X/FWKV-ROSA" target="_blank" rel="noopener">
+                <span class="model-name">FWKV-ROSA</span>
+                <span class="model-status live">~56M · UltraChat · live</span>
+              </a>
+            </li>
+            <li>
+              <a class="model-row" href="https://huggingface.co/FlameF0X/FWKV-50M" target="_blank" rel="noopener">
+                <span class="model-name">FWKV-50M</span>
+                <span class="model-status live">50.6M · WikiText · live</span>
+              </a>
+            </li>
+            <li>
+              <a class="model-row" href="https://huggingface.co/FlameF0X/FWKV-29M" target="_blank" rel="noopener">
+                <span class="model-name">FWKV-29M</span>
+                <span class="model-status live">28.9M · WikiText · live</span>
+              </a>
+            </li>
+            <li>
+              <a class="model-row" href="https://huggingface.co/FlameF0X/FWKV-TinyStories" target="_blank" rel="noopener">
+                <span class="model-name">FWKV-TinyStories</span>
+                <span class="model-status live">TinyStories · live</span>
+              </a>
+            </li>
+            <li>
+              <div class="model-row">
+                <span class="model-name">FWKV-100M</span>
+                <span class="model-status planned">planned · 2026–2027</span>
+              </div>
+            </li>
+            <li>
+              <div class="model-row">
+                <span class="model-name">FWKV-Translation</span>
+                <span class="model-status planned">planned · late 2026</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="model-group">
+          <p class="model-group-title">Other modalities</p>
+          <ul class="model-list">
+            <li>
+              <div class="model-row">
+                <span class="model-name">FWKV-CLIP</span>
+                <span class="model-status nap">image · NAP</span>
+              </div>
+            </li>
+            <li>
+              <div class="model-row">
+                <span class="model-name">Text-to-speech</span>
+                <span class="model-status nap">NAP</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- paper -->
+    <section id="paper">
+      <div class="wrap">
+        <p class="section-label">Paper</p>
+        <div class="paper-card">
+          <div>
+            <p class="paper-title">FWKV: Simplicity Is All You Need for Efficient Language Modeling</p>
+            <p class="paper-meta">Technical report · July 2026 · FlameF0X</p>
+          </div>
+          <a class="btn" href="https://flamef0x.github.io/papers/" target="_blank" rel="noopener">
+            Read the paper →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- partners -->
+    <section id="partners">
+      <div class="wrap">
+        <p class="section-label">With</p>
+        <div class="partners-row">
+          <a class="partner" href="https://huggingface.co/bench-labs" target="_blank" rel="noopener">
+            <img
+              src="https://cdn-avatars.huggingface.co/v1/production/uploads/6471b447a2b0a376b8b5e879/Vn-_-ktCQQkd76Z4BuLuW.png"
+              alt="Bench Labs"
+              width="36"
+              height="36"
+            />
+            <span class="partner-name">Bench Labs</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        FWKV · Apache 2.0<br />
+        Built by <a href="https://huggingface.co/FlameF0X" target="_blank" rel="noopener">FlameF0X</a>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Models</a></li>
+        <li><a href="https://flamef0x.github.io/papers/" target="_blank" rel="noopener">Paper</a></li>
+        <li><a href="https://flamef0x.github.io/blog/" target="_blank" rel="noopener">Blog</a></li>
+      </ul>
+    </div>
+  </footer>
+
+</body>
+</html>
