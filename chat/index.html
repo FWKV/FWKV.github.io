@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat — FWKV</title>
+  <meta name="description" content="FWKV chat interface — try the model live." />
+
+  <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/sro4XOnALHB4GmjOLxiZC.png" type="image/png" />
+
+  <!-- Fonts: technical mono + quiet humanistic sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── tokens ─────────────────────────────────────────── */
+    :root {
+      --bg:           #06070a;
+      --bg-elevated: #0c0e14;
+      --surface:     #10131c;
+      --border:      #1c2333;
+      --blue-dim:    #1a3a5c;
+      --blue:        #3d7ab5;
+      --blue-bright: #6ba8e0;
+      --cyan:        #8ec8f0;
+      --text:        #d8e0ec;
+      --text-muted:  #7a8ba0;
+      --text-faint:  #4a5a6e;
+      --white:       #f0f4fa;
+      --radius:      2px;
+      --font-mono:   "IBM Plex Mono", ui-monospace, monospace;
+      --font-sans:   "IBM Plex Sans", system-ui, sans-serif;
+    }
+
+    /* ── reset ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    img, video { display: block; max-width: 100%; }
+    a { color: var(--blue-bright); text-decoration: none; }
+    a:hover { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+    /* ── grain overlay ─────────────────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── nav ────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6, 7, 10, 0.82);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo:hover { color: var(--cyan); text-decoration: none; }
+    .nav-links {
+      display: flex;
+      gap: 1.6rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active {
+      color: var(--blue-bright);
+    }
+
+    /* ── chat layout ────────────────────────────────────── */
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: min(720px, 94vw);
+      margin: 0 auto;
+      min-height: 0;
+      padding-top: 1rem;
+    }
+
+    /* ── messages area ──────────────────────────────────── */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem 0.2rem;
+      min-height: 0;
+    }
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    /* ── empty state ────────────────────────────────────── */
+    .chat-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      gap: 0.4rem;
+    }
+    .chat-empty-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.6rem;
+      opacity: 0.5;
+    }
+    .chat-empty h2 {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: 1.15rem;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .chat-empty p {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+      max-width: 34ch;
+      line-height: 1.5;
+    }
+
+    /* ── input area ─────────────────────────────────────── */
+    .chat-input-wrap {
+      flex-shrink: 0;
+      padding: 0.8rem 0 1.4rem;
+    }
+    .chat-input-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.6rem 0.45rem 0.95rem;
+    }
+    .chat-input-row:focus-within {
+      border-color: var(--blue-dim);
+    }
+    .chat-input-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      padding: 0.45rem 0;
+    }
+    .chat-input-row input::placeholder {
+      color: var(--text-faint);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.03em;
+    }
+    .chat-input-row input:disabled { cursor: not-allowed; opacity: 0.5; }
+    .chat-send-btn {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--bg);
+      background: var(--blue);
+      border: none;
+      padding: 0.45rem 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .chat-send-btn:hover:not(:disabled) {
+      background: var(--blue-bright);
+    }
+    .chat-send-btn:disabled {
+      background: var(--border);
+      color: var(--text-faint);
+      cursor: not-allowed;
+    }
+    .chat-send-btn:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
+    }
+
+    /* ── responsive ─────────────────────────────────────── */
+    @media (max-width: 500px) {
+      .nav-links { gap: 0.9rem; }
+      .nav-links a { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-logo">FWKV</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#models">Models</a></li>
+        <li><a href="#" class="active">Chat</a></li>
+        <li><a href="../index.html#paper">Paper</a></li>
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Hugging Face</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- chat main -->
+  <div class="chat-main">
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty">
+        <div class="chat-empty-icon">◈</div>
+        <h2>FWKV Chat</h2>
+        <p>Chat is not yet live — a hosted inference endpoint is coming soon.</p>
+      </div>
+    </div>
+
+    <div class="chat-input-wrap">
+      <div class="chat-input-row">
+        <input
+          type="text"
+          placeholder="Message FWKV…"
+          disabled
+          aria-label="Chat message input"
+        />
+        <button class="chat-send-btn" disabled>Send</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
