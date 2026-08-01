@@ -119,6 +119,123 @@
       padding-top: 1rem;
     }
 
+    /* ── model selector dropdown ────────────────────────── */
+    .model-select-bar {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .model-select-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.6rem 0.4rem 0.75rem;
+      cursor: pointer;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+    .model-select-btn:hover {
+      border-color: var(--blue-dim);
+      background: var(--bg-elevated);
+    }
+    .model-select-btn .chevron {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      transition: transform 0.15s ease;
+      flex-shrink: 0;
+    }
+    .model-select-btn[aria-expanded="true"] .chevron {
+      transform: rotate(180deg);
+    }
+
+    .model-menu {
+      position: absolute;
+      bottom: calc(100% + 0.5rem);
+      left: 0;
+      width: 260px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px 10px 0px 0px;
+      padding: 0.35rem;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+      z-index: 50;
+      display: none;
+    }
+    .model-menu.open { display: block; }
+
+    .model-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      padding: 0.55rem 0.6rem;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      transition: background 0.12s ease;
+    }
+    .model-option:hover {
+      background: rgba(61, 122, 181, 0.14);
+    }
+    .model-option-check {
+      width: 16px;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+      color: var(--blue-bright);
+    }
+    .model-option-check svg {
+      display: none;
+      width: 16px;
+      height: 16px;
+    }
+    .model-option.selected .model-option-check svg {
+      display: block;
+    }
+    .model-option-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 0;
+    }
+    .model-option-name {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .model-option-desc {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .model-badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--cyan);
+      background: rgba(110, 168, 224, 0.14);
+      border-radius: 999px;
+      padding: 0.12rem 0.5rem;
+    }
+    .model-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.3rem 0.2rem;
+    }
+
     /* ── messages area ──────────────────────────────────── */
     .chat-messages {
       flex: 1;
@@ -166,6 +283,13 @@
       letter-spacing: 0.03em;
       max-width: 34ch;
       line-height: 1.5;
+    }
+    .chat-empty .chat-empty-model {
+      margin-top: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--blue-bright);
+      letter-spacing: 0.03em;
     }
 
     /* ── input area ─────────────────────────────────────── */
@@ -253,6 +377,7 @@
 
   <!-- chat main -->
   <div class="chat-main">
+
     <div class="chat-messages" id="chatMessages">
       <div class="chat-empty">
         <div class="chat-empty-icon">◈</div>
@@ -263,6 +388,49 @@
 
     <div class="chat-input-wrap">
       <div class="chat-input-row">
+        <div class="model-select-bar">
+          <button class="model-select-btn" id="modelSelectBtn" aria-haspopup="listbox" aria-expanded="false">
+            <span id="modelSelectLabel">Myosotis</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+
+          <div class="model-menu" id="modelMenu" role="listbox" aria-label="Select FWKV model">
+            <button class="model-option selected" data-model="myosotis" role="option" aria-selected="true">
+              <span class="model-option-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="model-option-text">
+                <span class="model-option-name">FWKV Myosotis</span>
+                <span class="model-option-desc">Smallest, fastest — 50M params</span>
+              </span>
+            </button>
+
+            <div class="model-divider"></div>
+
+            <button class="model-option" data-model="cyanus" role="option" aria-selected="false">
+              <span class="model-option-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="model-option-text">
+                <span class="model-option-name">FWKV Cyanus</span>
+                <span class="model-option-desc">Mid-size, all-around help</span>
+              </span>
+            </button>
+
+            <div class="model-divider"></div>
+
+            <button class="model-option" data-model="delphinium" role="option" aria-selected="false">
+              <span class="model-option-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="model-option-text">
+                <span class="model-option-name">FWKV Delphinium</span>
+                <span class="model-option-desc">Largest FWKV model</span>
+              </span>
+            </button>
+          </div>
+        </div>
+
         <input
           type="text"
           placeholder="Message FWKV…"
@@ -273,6 +441,52 @@
       </div>
     </div>
   </div>
+
+  <script>
+    const MODEL_NAMES = {
+      myosotis: "Myosotis",
+      cyanus: "Cyanus",
+      delphinium: "Delphinium",
+    };
+
+    const selectBtn = document.getElementById("modelSelectBtn");
+    const selectLabel = document.getElementById("modelSelectLabel");
+    const menu = document.getElementById("modelMenu");
+    const options = document.querySelectorAll(".model-option");
+
+    function closeMenu() {
+      menu.classList.remove("open");
+      selectBtn.setAttribute("aria-expanded", "false");
+    }
+    function openMenu() {
+      menu.classList.add("open");
+      selectBtn.setAttribute("aria-expanded", "true");
+    }
+
+    selectBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.contains("open") ? closeMenu() : openMenu();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!menu.contains(e.target) && e.target !== selectBtn) closeMenu();
+    });
+
+    options.forEach((opt) => {
+      opt.addEventListener("click", () => {
+        options.forEach((o) => {
+          o.classList.remove("selected");
+          o.setAttribute("aria-selected", "false");
+        });
+        opt.classList.add("selected");
+        opt.setAttribute("aria-selected", "true");
+
+        const modelKey = opt.dataset.model;
+        selectLabel.textContent = MODEL_NAMES[modelKey];
+        closeMenu();
+      });
+    });
+  </script>
 
 </body>
 </html>
