@@ -485,7 +485,7 @@
       <div class="chat-empty" id="chatEmpty">
         <div class="chat-empty-icon">◈</div>
         <h2>FWKV Chat</h2>
-        <p>Chat is in preview mode. Type a message to say hi to the mascot!</p>
+        <p>Chat is in preview mode.</p>
       </div>
     </div>
 
@@ -495,8 +495,8 @@
       <div class="fox-companion" id="foxCompanion" title="Click to pet!">
         <div class="fox-bubble" id="foxBubble">zZZ...</div>
         <div class="fox-box">
-          <pre id="foxAscii">  /\_/\   __   z
- 〈 -.- 〉 /  \  Z
+          <pre id="foxAscii"> /\_/\  __   z
+〈 -.- 〉 /  \ Z
  /   \_/  /
  \_|__\_/</pre>
         </div>
@@ -561,14 +561,14 @@
   <script>
     // ── ASCII Fox Frames ──────────────────────────────────────
     const FOX_FRAMES = {
-      sleep: ` /\\_/\\   __   z\n〈 -.- 〉 /  \\  Z\n /   \\_/  /\n \\_|__\\_/`,
-      awake: ` /\\_/\\   __\n〈 o.o 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
-      happy: ` /\\_/\\   __\n〈 ^.^ 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
-      yippy: ` /\\_/\\ z __\n〈 u.u 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
-      dizzy: ` /\\_/\\   __\n〈 @.@ 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
-      neutral:` /\\_/\\   __\n〈 -.- 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
-      shy:    ` /\\_/\\   __\n〈~o.o~〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
-      focus:  ` /\\_/\\   __\n〈 =.= 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`
+      sleep: ` /\\_/\\  __   z\n〈 -.- 〉 /  \\  Z\n /   \\_/  /\n \\_|__\\_/`,
+      awake: ` /\\_/\\  __\n〈 o.o 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      happy: ` /\\_/\\  __\n〈 ^.^ 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      yippy: ` /\\_/\\ z__\n〈 u.u 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      dizzy: ` /\\_/\\  __\n〈 @.@ 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      neutral:` /\\_/\\  __\n〈 -.- 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      shy:    ` /\\_/\\  __\n〈~o.o~〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      focus:  ` /\\_/\\  __\n〈 =.= 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`
     };
 
     // Elements
@@ -774,7 +774,7 @@
         botRow.className = "msg-row bot";
         botRow.innerHTML = `
           <div class="msg-author">${MODEL_NAMES[selectedModelKey]}</div>
-          <div class="msg-content">Hello! FWKV hosted inference is coming soon. The mascot fox and I are ready when you are!</div>
+          <div class="msg-content">Hello! FWKV hosted inference is coming soon.</div>
         `;
         chatMessages.appendChild(botRow);
         chatMessages.scrollTop = chatMessages.scrollHeight;
