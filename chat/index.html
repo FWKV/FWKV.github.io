@@ -344,7 +344,7 @@
     /* ── ASCII Fox Mascot ───────────────────────────────── */
     .fox-companion {
       position: absolute;
-      bottom: calc(100% - 1.2rem);
+      bottom: calc(100% - 0.9em);
       right: 0.8rem;
       z-index: 10;
       display: flex;
@@ -393,7 +393,6 @@
     .fox-companion:hover .fox-box {
       border-color: var(--blue-dim);
       color: var(--cyan);
-      transform: translateY(-2px);
     }
 
     .fox-box pre {
@@ -412,7 +411,7 @@
 
     @keyframes foxJump {
       0% { transform: translateY(0); }
-      40% { transform: translateY(-10px) scale(1.05); }
+      40% { transform: translateY(-1px) scale(1.05); }
       100% { transform: translateY(0); }
     }
 
