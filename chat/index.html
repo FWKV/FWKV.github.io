@@ -53,6 +53,7 @@
     a:hover { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
     a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 
+    /* STREAMING_CHUNK:Styling background texture and sticky navigation header -->
     /* ── grain overlay ─────────────────────────────────── */
     body::before {
       content: "";
@@ -108,6 +109,7 @@
       color: var(--blue-bright);
     }
 
+    /* STREAMING_CHUNK:Styling chat container and model selector popup -->
     /* ── chat layout ────────────────────────────────────── */
     .chat-main {
       flex: 1;
@@ -220,28 +222,22 @@
       font-size: 0.78rem;
       color: var(--text-muted);
     }
-    .model-badge {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      color: var(--cyan);
-      background: rgba(110, 168, 224, 0.14);
-      border-radius: 999px;
-      padding: 0.12rem 0.5rem;
-    }
     .model-divider {
       height: 1px;
       background: var(--border);
       margin: 0.3rem 0.2rem;
     }
 
+    /* STREAMING_CHUNK:Styling message log area and empty state layout -->
     /* ── messages area ──────────────────────────────────── */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
       padding: 0.5rem 0.2rem;
       min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
     }
     .chat-messages::-webkit-scrollbar {
       width: 4px;
@@ -263,6 +259,7 @@
       height: 100%;
       text-align: center;
       gap: 0.4rem;
+      margin: auto;
     }
     .chat-empty-icon {
       font-size: 2.2rem;
@@ -281,21 +278,16 @@
       font-size: 0.78rem;
       color: var(--text-faint);
       letter-spacing: 0.03em;
-      max-width: 34ch;
+      max-width: 36ch;
       line-height: 1.5;
     }
-    .chat-empty .chat-empty-model {
-      margin-top: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--blue-bright);
-      letter-spacing: 0.03em;
-    }
 
+    /* STREAMING_CHUNK:Styling input wrapper and ASCII fox mascot component -->
     /* ── input area ─────────────────────────────────────── */
     .chat-input-wrap {
       flex-shrink: 0;
       padding: 0.8rem 0 1.4rem;
+      position: relative;
     }
     .chat-input-row {
       display: flex;
@@ -304,6 +296,8 @@
       background: var(--surface);
       border: 1px solid var(--border);
       padding: 0.45rem 0.6rem 0.45rem 0.95rem;
+      position: relative;
+      z-index: 2;
     }
     .chat-input-row:focus-within {
       border-color: var(--blue-dim);
@@ -324,7 +318,6 @@
       font-size: 0.78rem;
       letter-spacing: 0.03em;
     }
-    .chat-input-row input:disabled { cursor: not-allowed; opacity: 0.5; }
     .chat-send-btn {
       font-family: var(--font-mono);
       font-size: 0.74rem;
@@ -347,15 +340,126 @@
       color: var(--text-faint);
       cursor: not-allowed;
     }
-    .chat-send-btn:focus-visible {
-      outline: 2px solid var(--cyan);
-      outline-offset: 2px;
+
+    /* ── ASCII Fox Mascot ───────────────────────────────── */
+    .fox-companion {
+      position: absolute;
+      bottom: calc(100% - 1.2rem);
+      right: 0.8rem;
+      z-index: 10;
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+      cursor: pointer;
+      user-select: none;
+      pointer-events: auto;
+    }
+
+    .fox-bubble {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--cyan);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      margin-bottom: 0.6rem;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    .fox-bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fox-box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-bottom: 1px solid var(--bg-elevated);
+      border-radius: 6px 6px 0 0;
+      padding: 0.35rem 0.6rem 0.2rem 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      line-height: 1.15;
+      color: var(--blue-bright);
+      transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .fox-companion:hover .fox-box {
+      border-color: var(--blue-dim);
+      color: var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    .fox-box pre {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.72rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+      margin: 0;
+      white-space: pre;
+    }
+
+    /* Jump animation on message send */
+    .fox-companion.jump .fox-box {
+      animation: foxJump 0.45s ease;
+    }
+
+    @keyframes foxJump {
+      0% { transform: translateY(0); }
+      40% { transform: translateY(-10px) scale(1.05); }
+      100% { transform: translateY(0); }
+    }
+
+    /* STREAMING_CHUNK:Styling message bubble elements -->
+    /* ── message bubbles ───────────────────────────────── */
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 82%;
+    }
+    .msg-row.user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .msg-row.bot {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    .msg-author {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-faint);
+      margin-bottom: 0.2rem;
+      padding: 0 0.2rem;
+    }
+    .msg-content {
+      padding: 0.6rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .msg-row.user .msg-content {
+      background: var(--blue-dim);
+      color: var(--white);
+      border: 1px solid rgba(110, 168, 224, 0.25);
+    }
+    .msg-row.bot .msg-content {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
     }
 
     /* ── responsive ─────────────────────────────────────── */
     @media (max-width: 500px) {
       .nav-links { gap: 0.9rem; }
       .nav-links a { font-size: 0.7rem; }
+      .fox-bubble { display: none; }
     }
   </style>
 </head>
@@ -379,14 +483,26 @@
   <div class="chat-main">
 
     <div class="chat-messages" id="chatMessages">
-      <div class="chat-empty">
+      <div class="chat-empty" id="chatEmpty">
         <div class="chat-empty-icon">◈</div>
         <h2>FWKV Chat</h2>
-        <p>Chat is not yet live — a hosted inference endpoint is coming soon.</p>
+        <p>Chat is in preview mode. Type a message to say hi to the mascot!</p>
       </div>
     </div>
 
-    <div class="chat-input-wrap">
+    <div class="chat-input-wrap" id="inputWrap">
+      
+      <!-- ASCII Fox Mascot resting on top right of input box -->
+      <div class="fox-companion" id="foxCompanion" title="Click to pet!">
+        <div class="fox-bubble" id="foxBubble">zZZ...</div>
+        <div class="fox-box">
+          <pre id="foxAscii">  /\_/\   __   z
+ 〈 -.- 〉 /  \  Z
+ /   \_/  /
+ \_|__\_/</pre>
+        </div>
+      </div>
+
       <div class="chat-input-row">
         <div class="model-select-bar">
           <button class="model-select-btn" id="modelSelectBtn" aria-haspopup="listbox" aria-expanded="false">
@@ -433,22 +549,158 @@
 
         <input
           type="text"
+          id="chatInput"
           placeholder="Message FWKV…"
-          disabled
           aria-label="Chat message input"
+          autocomplete="off"
         />
-        <button class="chat-send-btn" disabled>Send</button>
+        <button class="chat-send-btn" id="sendBtn">Send</button>
       </div>
     </div>
   </div>
 
   <script>
+    // ── ASCII Fox Frames ──────────────────────────────────────
+    const FOX_FRAMES = {
+      sleep: ` /\\_/\\   __   z\n〈 -.- 〉 /  \\  Z\n /   \\_/  /\n \\_|__\\_/`,
+      awake: ` /\\_/\\   __\n〈 o.o 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      happy: ` /\\_/\\   __\n〈 ^.^ 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      yippy: ` /\\_/\\ z __\n〈 u.u 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      dizzy: ` /\\_/\\   __\n〈 @.@ 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      neutral:` /\\_/\\   __\n〈 -.- 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      shy:    ` /\\_/\\   __\n〈~o.o~〉 /  \\\n /   \\_/  /\n \\_|__\\_/`,
+      focus:  ` /\\_/\\   __\n〈 =.= 〉 /  \\\n /   \\_/  /\n \\_|__\\_/`
+    };
+
+    // Elements
+    const foxCompanion = document.getElementById("foxCompanion");
+    const foxAscii     = document.getElementById("foxAscii");
+    const foxBubble    = document.getElementById("foxBubble");
+    const inputWrap    = document.getElementById("inputWrap");
+    const chatInput    = document.getElementById("chatInput");
+    const sendBtn      = document.getElementById("sendBtn");
+    const chatMessages = document.getElementById("chatMessages");
+    const chatEmpty    = document.getElementById("chatEmpty");
+
+    let currentState = "sleep";
+    let sleepTimer   = null;
+    let bubbleTimer  = null;
+    let petClicks    = 0;
+    let isAwake      = false;
+
+    // Helper to update Fox ASCII and optional speech bubble
+    function setFoxState(state, text = null) {
+      currentState = state;
+      if (FOX_FRAMES[state]) {
+        foxAscii.textContent = FOX_FRAMES[state];
+      }
+      if (text) {
+        showBubble(text);
+      }
+    }
+
+    function showBubble(text) {
+      clearTimeout(bubbleTimer);
+      foxBubble.textContent = text;
+      foxBubble.classList.add("visible");
+      bubbleTimer = setTimeout(() => {
+        foxBubble.classList.remove("visible");
+      }, 2400);
+    }
+
+    function resetSleepTimer() {
+      clearTimeout(sleepTimer);
+      // Fall asleep after 7 seconds of inactivity
+      sleepTimer = setTimeout(() => {
+        if (document.activeElement !== chatInput) {
+          isAwake = false;
+          setFoxState("sleep", "zZZ...");
+        }
+      }, 7000);
+    }
+
+    function wakeUp(msg = "Oh! Hi!") {
+      if (!isAwake) {
+        isAwake = true;
+        setFoxState("awake", msg);
+      }
+      resetSleepTimer();
+    }
+
+    // ── Fox Hover & Interaction Listeners ──────────────────────
+    inputWrap.addEventListener("mouseenter", () => {
+      wakeUp("Oh! Hi!");
+    });
+
+    inputWrap.addEventListener("mousemove", () => {
+      resetSleepTimer();
+    });
+
+    foxCompanion.addEventListener("mouseenter", () => {
+      wakeUp();
+      setFoxState("shy", "Blush ~");
+    });
+
+    foxCompanion.addEventListener("mouseleave", () => {
+      if (document.activeElement === chatInput) {
+        setFoxState("focus", "Listening...");
+      } else {
+        setFoxState("awake");
+      }
+    });
+
+    // Petting the fox on click!
+    foxCompanion.addEventListener("click", () => {
+      petClicks++;
+      wakeUp();
+
+      // Trigger jump animation
+      foxCompanion.classList.remove("jump");
+      void foxCompanion.offsetWidth; // reflow
+      foxCompanion.classList.add("jump");
+
+      if (petClicks >= 5) {
+        setFoxState("dizzy", "Whoa, dizzy!");
+        petClicks = 0;
+      } else if (petClicks % 2 === 1) {
+        setFoxState("yippy", "Squeak! *hop*");
+      } else {
+        setFoxState("happy", "Hehe!");
+      }
+
+      setTimeout(() => {
+        foxCompanion.classList.remove("jump");
+      }, 500);
+    });
+
+    // Input focus & typing reactions
+    chatInput.addEventListener("focus", () => {
+      isAwake = true;
+      setFoxState("focus", "Listening...");
+      resetSleepTimer();
+    });
+
+    chatInput.addEventListener("input", () => {
+      wakeUp();
+      if (chatInput.value.trim().length > 0) {
+        setFoxState("happy", "Oooh!");
+      } else {
+        setFoxState("focus", "Listening...");
+      }
+    });
+
+    chatInput.addEventListener("blur", () => {
+      resetSleepTimer();
+    });
+
+    // ── Model Selector Dropdown ──────────────────────────────
     const MODEL_NAMES = {
       myosotis: "Myosotis 1",
       cyanus: "Cyanus 1",
       delphinium: "Delphinium 1",
     };
 
+    let selectedModelKey = "myosotis";
     const selectBtn = document.getElementById("modelSelectBtn");
     const selectLabel = document.getElementById("modelSelectLabel");
     const menu = document.getElementById("modelMenu");
@@ -461,6 +713,7 @@
     function openMenu() {
       menu.classList.add("open");
       selectBtn.setAttribute("aria-expanded", "true");
+      wakeUp("Switched!");
     }
 
     selectBtn.addEventListener("click", (e) => {
@@ -481,10 +734,64 @@
         opt.classList.add("selected");
         opt.setAttribute("aria-selected", "true");
 
-        const modelKey = opt.dataset.model;
-        selectLabel.textContent = MODEL_NAMES[modelKey];
+        selectedModelKey = opt.dataset.model;
+        selectLabel.textContent = MODEL_NAMES[selectedModelKey];
         closeMenu();
+        setFoxState("happy", `Switched to ${MODEL_NAMES[selectedModelKey]}!`);
       });
+    });
+
+    // ── Send Message Logic ────────────────────────────────────
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      if (chatEmpty) {
+        chatEmpty.style.display = "none";
+      }
+
+      // Add user message
+      const userRow = document.createElement("div");
+      userRow.className = "msg-row user";
+      userRow.innerHTML = `
+        <div class="msg-author">You</div>
+        <div class="msg-content">${escapeHtml(text)}</div>
+      `;
+      chatMessages.appendChild(userRow);
+
+      chatInput.value = "";
+
+      // Fox reacts excitedly
+      foxCompanion.classList.remove("jump");
+      void foxCompanion.offsetWidth;
+      foxCompanion.classList.add("jump");
+      setFoxState("yippy", "Processing...");
+
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Simulated FWKV model response
+      setTimeout(() => {
+        const botRow = document.createElement("div");
+        botRow.className = "msg-row bot";
+        botRow.innerHTML = `
+          <div class="msg-author">${MODEL_NAMES[selectedModelKey]}</div>
+          <div class="msg-content">Hello! FWKV hosted inference is coming soon. The mascot fox and I are ready when you are!</div>
+        `;
+        chatMessages.appendChild(botRow);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        setFoxState("happy", "Done!");
+      }, 700);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      })[m]);
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
     });
   </script>
 
