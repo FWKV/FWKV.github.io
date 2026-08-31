@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard — FWKV</title>
+  <meta name="description" content="A leaderboard for non-transformer language models — hybrid and pure (RNN / SSM) brackets, scored with lm-eval-harness. Community submissions welcome." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Leaderboard — FWKV" />
+  <meta property="og:description" content="A leaderboard for non-transformer language models — hybrid and pure (RNN / SSM) brackets, scored with lm-eval-harness." />
+  <meta property="og:image" content="https://cdn-uploads.huggingface.co/production/uploads/6615494716917dfdc645c44e/k839qGKNniqOM_4PdpvoG.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Leaderboard — FWKV" />
+  <meta name="twitter:description" content="A leaderboard for non-transformer language models — hybrid and pure (RNN / SSM) brackets, scored with lm-eval-harness." />
+  <meta name="twitter:image" content="https://cdn-uploads.huggingface.co/production/uploads/6615494716917dfdc645c44e/k839qGKNniqOM_4PdpvoG.png" />
+
+  <meta name="theme-color" content="#3d7ab5" />
+
+  <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/sro4XOnALHB4GmjOLxiZC.png" type="image/png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── tokens ─────────────────────────────────────────── */
+    :root {
+      --bg:           #06070a;
+      --bg-elevated: #0c0e14;
+      --surface:     #10131c;
+      --border:      #1c2333;
+      --blue-dim:    #1a3a5c;
+      --blue:        #3d7ab5;
+      --blue-bright: #6ba8e0;
+      --cyan:        #8ec8f0;
+      --green:       #7bc98f;
+      --amber:       #d9b26a;
+      --text:        #d8e0ec;
+      --text-muted:  #7a8ba0;
+      --text-faint:  #4a5a6e;
+      --white:       #f0f4fa;
+      --radius:      2px;
+      --font-mono:   "IBM Plex Mono", ui-monospace, monospace;
+      --font-sans:   "IBM Plex Sans", system-ui, sans-serif;
+    }
+
+    /* ── reset ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img, video { display: block; max-width: 100%; }
+    a { color: var(--blue-bright); text-decoration: none; }
+    a:hover { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+    /* ── grain overlay ─────────────────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── layout shell ───────────────────────────────────── */
+    .wrap {
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+
+    /* ── nav ────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6, 7, 10, 0.82);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo:hover { color: var(--cyan); text-decoration: none; }
+    .nav-links {
+      display: flex;
+      gap: 1.6rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active {
+      color: var(--blue-bright);
+    }
+
+    /* ── "Other" dropdown ───────────────────────────────── */
+    .nav-drop { position: relative; }
+    .nav-drop-toggle { cursor: default; }
+    .nav-drop-toggle::after {
+      content: "▾";
+      margin-left: 0.35rem;
+      font-size: 0.7rem;
+      color: var(--text-faint);
+    }
+    .nav-drop-menu {
+      position: absolute;
+      top: calc(100% + 0.4rem);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 150px;
+      list-style: none;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+      z-index: 300;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+    .nav-drop-menu::before {
+      content: "";
+      position: absolute;
+      top: -0.4rem;
+      left: 0;
+      right: 0;
+      height: 0.4rem;
+    }
+    .nav-drop:hover .nav-drop-menu,
+    .nav-drop:focus-within .nav-drop-menu {
+      opacity: 1;
+      visibility: visible;
+    }
+    .nav-drop-menu li a {
+      display: block;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .nav-drop-menu li a:hover {
+      color: var(--white);
+      background: rgba(26, 58, 92, 0.18);
+      text-decoration: none;
+    }
+    .nav-drop-menu a.active { color: var(--cyan); }
+
+    /* ── hero ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 50vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 3.5rem;
+      overflow: hidden;
+    }
+    .hero-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0.55;
+      filter: contrast(1.1) brightness(0.85);
+    }
+    .hero-fade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(6, 7, 10, 0.2) 0%, rgba(6, 7, 10, 0.6) 55%, var(--bg) 100%),
+        radial-gradient(ellipse 80% 60% at 50% 40%, transparent 30%, rgba(6, 7, 10, 0.7) 100%);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue-bright);
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: clamp(2.2rem, 6.5vw, 3.8rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      margin-bottom: 0.7rem;
+    }
+    .hero h1 em { color: var(--cyan); font-style: normal; }
+    .hero-tagline {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      font-size: clamp(1rem, 2.3vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 42ch;
+      margin-bottom: 1.4rem;
+    }
+    .related-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+      margin-bottom: 1.8rem;
+    }
+    .related-link a { color: var(--blue-bright); }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+    .hero-meta span strong {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ── sections ───────────────────────────────────────── */
+    section {
+      padding: 4rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 1.4rem;
+    }
+    h2 {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+      color: var(--white);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.1rem;
+      line-height: 1.3;
+    }
+    p {
+      color: var(--text-muted);
+      max-width: 68ch;
+      margin-bottom: 1.1rem;
+    }
+    p:last-child { margin-bottom: 0; }
+    .note {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-faint);
+      margin-top: 1rem;
+    }
+    .model-inline {
+      color: var(--cyan);
+      font-family: var(--font-mono);
+    }
+
+    /* ── brackets ───────────────────────────────────────── */
+    .bracket {
+      margin-bottom: 2rem;
+    }
+    .bracket:last-child { margin-bottom: 0; }
+    .bracket-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: none;
+    }
+    .bracket-title {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+    .bracket-tag {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+    .bracket-tag.hybrid { color: var(--amber); }
+    .bracket-tag.pure { color: var(--green); }
+
+    .table-scroll { overflow-x: auto; }
+    table.lb-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      min-width: 780px;
+      border: 1px solid var(--border);
+    }
+    .lb-table th {
+      text-align: left;
+      font-weight: 500;
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .lb-table th.num, .lb-table td.num { text-align: right; }
+    .lb-table td {
+      padding: 0.78rem 1rem;
+      border-bottom: 1px solid rgba(28, 35, 51, 0.6);
+      white-space: nowrap;
+      color: var(--text);
+    }
+    .lb-table tbody tr:last-child td { border-bottom: none; }
+    .lb-table tbody tr:hover td { background: rgba(26, 58, 92, 0.12); }
+
+    .rank {
+      color: var(--blue-bright);
+      font-weight: 500;
+      width: 3.2rem;
+    }
+    .model-cell {
+      font-family: var(--font-sans);
+      font-weight: 500;
+      color: var(--white);
+    }
+    .model-sub {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 400;
+      color: var(--text-faint);
+      margin-top: 0.12rem;
+      letter-spacing: 0.02em;
+    }
+    .avg {
+      color: var(--blue-bright);
+      font-weight: 600;
+    }
+    .score { color: var(--green); }
+    .dash  { color: var(--text-faint); }
+    .params { color: var(--text-muted); }
+    .pending {
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    tr.highlight td {
+      background: rgba(26, 58, 92, 0.22);
+      border-top: 1px solid var(--blue-dim);
+      border-bottom: 1px solid var(--blue-dim);
+    }
+    tr.highlight:hover td { background: rgba(26, 58, 92, 0.3); }
+    tr.highlight .rank { color: var(--cyan); }
+    tr.highlight .model-cell { color: var(--cyan); }
+    tr.highlight .avg { color: var(--cyan); }
+    .you-marker {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-left: 0.6rem;
+    }
+
+    tr.open-slot td {
+      text-align: center;
+      padding: 0.8rem 1rem;
+      color: var(--text-faint);
+      font-size: 0.74rem;
+      letter-spacing: 0.05em;
+      border-top: 1px dashed var(--border);
+      border-bottom: none;
+    }
+
+    /* ── methodology ────────────────────────────────────── */
+    .formula-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 1.4rem 1.5rem;
+      margin: 1.4rem 0 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .formula-card code {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--cyan);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .formula-card code span { color: var(--text-muted); }
+    .method-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-width: 68ch;
+      margin-top: 0.4rem;
+    }
+    .method-list li {
+      color: var(--text-muted);
+      padding-left: 1.2rem;
+      position: relative;
+    }
+    .method-list li::before {
+      content: "—";
+      position: absolute;
+      left: 0;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
+    }
+    .method-list li strong { color: var(--text); font-weight: 500; }
+
+    /* ── submit ─────────────────────────────────────────── */
+    .cmd {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0 1.6rem;
+      overflow-x: auto;
+    }
+    .cmd code {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--cyan);
+      white-space: pre;
+    }
+    .submit-steps {
+      list-style: none;
+      counter-reset: step;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 68ch;
+      margin-top: 0.4rem;
+    }
+    .submit-steps li {
+      position: relative;
+      padding-left: 2.4rem;
+      color: var(--text-muted);
+      counter-increment: step;
+    }
+    .submit-steps li::before {
+      content: counter(step, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.1rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--blue-bright);
+      border: 1px solid var(--blue-dim);
+      padding: 0.1rem 0.4rem;
+    }
+    .submit-steps li strong { color: var(--text); font-weight: 500; }
+    .submit-steps li code {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--cyan);
+    }
+
+    /* ── footer ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0 3.5rem;
+    }
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    .footer-brand {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      line-height: 1.7;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+    }
+    .footer-links a:hover { color: var(--text-muted); }
+
+    /* ── responsive ─────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .nav-links { gap: 0.9rem; }
+      .nav-links a { font-size: 0.7rem; }
+      .hero-meta { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="../../index.html" class="nav-logo">FWKV</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html#about">About</a></li>
+        <li><a href="../../index.html#models">Models</a></li>
+        <li class="nav-drop">
+          <a href="#" class="nav-drop-toggle" aria-haspopup="true">Other</a>
+          <ul class="nav-drop-menu">
+            <li><a href="../eval/">Eval</a></li>
+            <li><a href="#" class="active">Leaderboard</a></li>
+          </ul>
+        </li>
+        <li><a href="../../chat/">Chat</a></li>
+        <li><a href="../../index.html#paper">Paper</a></li>
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Hugging Face</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- hero -->
+  <header class="hero">
+    <img
+      class="hero-img"
+      src="/assets/ascii-art-leaderboard.png"
+      alt="Myosotis-1 benchmark progress chart"
+    />
+    <div class="hero-fade"></div>
+    <div class="wrap hero-content">
+      <p class="hero-eyebrow">Leaderboard · non-transformers · 2026</p>
+      <h1>Not a<br /><em>transformer.</em></h1>
+      <p class="hero-tagline">
+        Every architecture that isn't a dense transformer — hybrids and pure
+        recurrent / state-space models — ranked by lm-eval-harness results.
+        Community submissions open.
+      </p>
+      <p class="related-link">
+        Comparing against transformers? See the
+        <a href="../eval/">Eval page →</a>
+      </p>
+      <div class="hero-meta">
+        <span><strong>Brackets</strong> 2</span>
+        <span><strong>Benchmarks</strong> 5 +</span>
+        <span><strong>Submission</strong> lm-eval-harness</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- brackets -->
+    <section id="brackets">
+      <div class="wrap">
+        <p class="section-label">Brackets</p>
+        <h2>Hybrid vs. pure.</h2>
+        <p>
+          Two brackets, one rule: no dense transformer. Models that mix
+          attention with a recurrent or state-space core go in
+          <strong class="model-inline">hybrid</strong>. Models with no
+          attention at all — pure RNNs and pure SSMs — share the
+          <strong class="model-inline">pure</strong> bracket.
+        </p>
+        <p>
+          Rows are added from self-submitted lm-eval-harness runs. A row is
+          only ranked once its results are posted with the exact command used.
+          Ranks below reflect submitted, reproducible results only.
+        </p>
+
+        <!-- hybrid -->
+        <div class="bracket">
+          <div class="bracket-head">
+            <span class="bracket-title">Hybrid</span>
+            <span class="bracket-tag hybrid">attention + recurrent / SSM</span>
+          </div>
+          <div class="table-scroll">
+            <table class="lb-table" aria-label="Hybrid non-transformer leaderboard">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th class="num">Params</th>
+                  <th class="num">Avg</th>
+                  <th class="num">HellaSwag</th>
+                  <th class="num">ARC-easy</th>
+                  <th class="num">ARC-challenge</th>
+                  <th class="num">PIQA</th>
+                  <th class="num">NITHS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="rank">—</td>
+                  <td class="model-cell">Hymba<span class="model-sub">hybrid attention + Mamba · NVIDIA</span></td>
+                  <td class="num params">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                </tr>
+                <tr>
+                  <td class="rank">—</td>
+                  <td class="model-cell">Samba<span class="model-sub">hybrid Mamba + attention · Microsoft</span></td>
+                  <td class="num params">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                </tr>
+                <tr>
+                  <td class="rank">—</td>
+                  <td class="model-cell">Zamba<span class="model-sub">hybrid attention + Mamba2 · Zyphra</span></td>
+                  <td class="num params">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                </tr>
+                <tr class="open-slot"><td colspan="9">+ your hybrid model here — submit results below</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">Known hybrid families shown as placeholders until results are submitted.</p>
+        </div>
+
+        <!-- pure -->
+        <div class="bracket">
+          <div class="bracket-head">
+            <span class="bracket-title">Pure</span>
+            <span class="bracket-tag pure">RNN + SSM</span>
+          </div>
+          <div class="table-scroll">
+            <table class="lb-table" aria-label="Pure non-transformer leaderboard">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th class="num">Params</th>
+                  <th class="num">Avg</th>
+                  <th class="num">HellaSwag</th>
+                  <th class="num">ARC-easy</th>
+                  <th class="num">ARC-challenge</th>
+                  <th class="num">PIQA</th>
+                  <th class="num">NITHS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="rank">—</td>
+                  <td class="model-cell">RWKV-6<span class="model-sub">pure RNN · RWKV Community</span></td>
+                  <td class="num params">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                </tr>
+                <tr>
+                  <td class="rank">—</td>
+                  <td class="model-cell">Mamba-2<span class="model-sub">pure SSM · Mamba</span></td>
+                  <td class="num params">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                </tr>
+
+                <tr class="highlight">
+                  <td class="rank">1</td>
+                  <td class="model-cell">Myosotis-1<span class="you-marker">◈ FWKV</span><span class="model-sub">pure RNN · FWKV · checkpoint 22000</span></td>
+                  <td class="num params">101m</td>
+                  <td class="num avg">6.20</td>
+                  <td class="num score">25.64</td>
+                  <td class="num score">34.51</td>
+                  <td class="num score">22.10</td>
+                  <td class="num score">57.56</td>
+                  <td class="num dash">—</td>
+                </tr>
+
+                <tr>
+                  <td class="rank">—</td>
+                  <td class="model-cell">S4<span class="model-sub">pure SSM · Stanford</span></td>
+                  <td class="num params">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                  <td class="num dash">—</td>
+                </tr>
+                <tr class="open-slot"><td colspan="9">+ your RNN / SSM model here — submit results below</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">Myosotis-1 is the first submitted row. Placeholders are awaiting results.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- methodology -->
+    <section id="method">
+      <div class="wrap">
+        <p class="section-label">Methodology</p>
+        <h2>How AVG is calculated</h2>
+        <p>
+          Each benchmark is normalized off its random-chance floor, then
+          averaged across whatever benchmarks a model has reported.
+        </p>
+        <div class="formula-card">
+          <code>N(score, chance) = 100 <span>×</span> (score − chance) <span>÷</span> (100 − chance)</code>
+          <code>AVG = mean(N) <span>over available benchmarks</span></code>
+        </div>
+        <ul class="method-list">
+          <li><strong>Chance floors:</strong> HellaSwag 25 · ARC-easy 25 · ARC-challenge 25 · PIQA 50.</li>
+          <li>Missing benchmarks are excluded from that model's AVG; <strong>at least two are required</strong>.</li>
+          <li><strong>NITHS</strong> is displayed but not counted toward AVG until a chance floor is agreed on.</li>
+          <li>Extra benchmarks can be added on submission; they join the AVG once their floor is defined.</li>
+          <li>Scores below chance may be negative.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- submit -->
+    <section id="submit">
+      <div class="wrap">
+        <p class="section-label">Submit</p>
+        <h2>Put your model on the board.</h2>
+        <p>
+          Run your model through
+          <a href="https://github.com/EleutherAI/lm-evaluation-harness" target="_blank" rel="noopener">lm-evaluation-harness</a>
+          and post the numbers. Reproducibility is the only rule — include the
+          exact command and commit so anyone can verify.
+        </p>
+        <div class="cmd"><code>lm_eval --model hf \
+  --model_args pretrained=&lt;model_id&gt; \
+  --tasks hellaswag,arc_easy,arc_challenge,piqa,niths \
+  --batch_size auto \
+  --output_path results.json</code></div>
+        <ol class="submit-steps">
+          <li><strong>Run the harness</strong> — include <code>hellaswag</code>, <code>arc_easy</code>, <code>arc_challenge</code>, <code>piqa</code>, and <code>niths</code> if your model supports it.</li>
+          <li><strong>Collect the output</strong> — model name, architecture class (<code>hybrid</code> / <code>rnn</code> / <code>ssm</code>), param count, and checkpoint/step.</li>
+          <li><strong>Note the exact command</strong> and the <code>lm-eval-harness</code> commit for verification.</li>
+          <li><strong>Submit</strong> — open an issue or pull request on the site repository
+            (<a href="https://github.com/FWKV/FWKV.github.io" target="_blank" rel="noopener">FWKV/FWKV.github.io</a>)
+            with your <code>results.json</code>, or reach out via
+            <a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Hugging Face</a>.</li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        FWKV · Apache 2.0<br />
+        Built by <a href="https://huggingface.co/FlameF0X" target="_blank" rel="noopener">FlameF0X</a>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://fwkv.github.io/privacy/"  target="_blank" rel="noopener">Privacy</a></li>
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Models</a></li>
+        <li><a href="https://flamef0x.github.io/papers/" target="_blank" rel="noopener">Paper</a></li>
+        <li><a href="https://flamef0x.github.io/blog/" target="_blank" rel="noopener">Blog</a></li>
+      </ul>
+    </div>
+  </footer>
+
+</body>
+</html>

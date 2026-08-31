@@ -122,6 +122,59 @@
     }
     .nav-links a:hover { color: var(--text); }
 
+    /* ── "Other" dropdown ───────────────────────────────── */
+    .nav-drop { position: relative; }
+    .nav-drop-toggle { cursor: default; }
+    .nav-drop-toggle::after {
+      content: "▾";
+      margin-left: 0.35rem;
+      font-size: 0.7rem;
+      color: var(--text-faint);
+    }
+    .nav-drop-menu {
+      position: absolute;
+      top: calc(100% + 0.4rem);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 150px;
+      list-style: none;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+      z-index: 300;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+    .nav-drop-menu::before {
+      content: "";
+      position: absolute;
+      top: -0.4rem;
+      left: 0;
+      right: 0;
+      height: 0.4rem;
+    }
+    .nav-drop:hover .nav-drop-menu,
+    .nav-drop:focus-within .nav-drop-menu {
+      opacity: 1;
+      visibility: visible;
+    }
+    .nav-drop-menu li a {
+      display: block;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .nav-drop-menu li a:hover {
+      color: var(--white);
+      background: rgba(26, 58, 92, 0.18);
+      text-decoration: none;
+    }
+    .nav-drop-menu a.active { color: var(--cyan); }
+
     /* ── hero ───────────────────────────────────────────── */
     .hero {
       position: relative;
@@ -479,6 +532,13 @@
       <ul class="nav-links">
         <li><a href="#about">About</a></li>
         <li><a href="#models">Models</a></li>
+        <li class="nav-drop">
+          <a href="#" class="nav-drop-toggle" aria-haspopup="true">Other</a>
+          <ul class="nav-drop-menu">
+            <li><a href="other/eval/">Eval</a></li>
+            <li><a href="other/leaderboard/">Leaderboard</a></li>
+          </ul>
+        </li>
         <li><a href="chat/">Chat</a></li>
         <li><a href="#paper">Paper</a></li>
         <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Hugging Face</a></li>
@@ -614,12 +674,6 @@
     <section id="models">
       <div class="wrap">
         <p class="section-label">Models</p>
-        <h2>Named simply so you can find them.</h2>
-        <p class="models-intro">
-          Pattern: <code style="font-family:var(--font-mono);color:var(--blue-bright);font-size:0.9em">FWKV-[size or type]</code>.
-          Everything lives under the
-          <a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">FWKV</a> organization on Hugging Face.
-        </p>
 
         <div class="model-group">
           <p class="model-group-title">Language models</p>
@@ -650,14 +704,8 @@
             </li>
             <li>
               <div class="model-row">
-                <span class="model-name">FWKV-100M</span>
+                <span class="model-name">Myosotis-1</span>
                 <span class="model-status planned">planned · 2026–2027</span>
-              </div>
-            </li>
-            <li>
-              <div class="model-row">
-                <span class="model-name">FWKV-Translation</span>
-                <span class="model-status planned">planned · late 2026</span>
               </div>
             </li>
           </ul>

@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eval — FWKV</title>
+  <meta name="description" content="Myosotis-1 (checkpoint 11000) measured against the small language model landscape. Intelligence Index leaderboard." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Eval — FWKV" />
+  <meta property="og:description" content="Myosotis-1 (checkpoint 11000) measured against the small language model landscape. Intelligence Index leaderboard." />
+  <meta property="og:image" content="https://cdn-uploads.huggingface.co/production/uploads/6615494716917dfdc645c44e/k839qGKNniqOM_4PdpvoG.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Eval — FWKV" />
+  <meta name="twitter:description" content="Myosotis-1 (checkpoint 11000) measured against the small language model landscape. Intelligence Index leaderboard." />
+  <meta name="twitter:image" content="https://cdn-uploads.huggingface.co/production/uploads/6615494716917dfdc645c44e/k839qGKNniqOM_4PdpvoG.png" />
+
+  <meta name="theme-color" content="#3d7ab5" />
+
+  <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/sro4XOnALHB4GmjOLxiZC.png" type="image/png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── tokens ─────────────────────────────────────────── */
+    :root {
+      --bg:           #06070a;
+      --bg-elevated: #0c0e14;
+      --surface:     #10131c;
+      --border:      #1c2333;
+      --blue-dim:    #1a3a5c;
+      --blue:        #3d7ab5;
+      --blue-bright: #6ba8e0;
+      --cyan:        #8ec8f0;
+      --green:       #7bc98f;
+      --text:        #d8e0ec;
+      --text-muted:  #7a8ba0;
+      --text-faint:  #4a5a6e;
+      --white:       #f0f4fa;
+      --radius:      2px;
+      --font-mono:   "IBM Plex Mono", ui-monospace, monospace;
+      --font-sans:   "IBM Plex Sans", system-ui, sans-serif;
+    }
+
+    /* ── reset ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img, video { display: block; max-width: 100%; }
+    a { color: var(--blue-bright); text-decoration: none; }
+    a:hover { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+    /* ── grain overlay ─────────────────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── layout shell ───────────────────────────────────── */
+    .wrap {
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+
+    /* ── nav ────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6, 7, 10, 0.82);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo:hover { color: var(--cyan); text-decoration: none; }
+    .nav-links {
+      display: flex;
+      gap: 1.6rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active {
+      color: var(--blue-bright);
+    }
+
+    /* ── "Other" dropdown ───────────────────────────────── */
+    .nav-drop { position: relative; }
+    .nav-drop-toggle { cursor: default; }
+    .nav-drop-toggle::after {
+      content: "▾";
+      margin-left: 0.35rem;
+      font-size: 0.7rem;
+      color: var(--text-faint);
+    }
+    .nav-drop-menu {
+      position: absolute;
+      top: calc(100% + 0.4rem);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 150px;
+      list-style: none;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+      z-index: 300;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+    .nav-drop-menu::before {
+      content: "";
+      position: absolute;
+      top: -0.4rem;
+      left: 0;
+      right: 0;
+      height: 0.4rem;
+    }
+    .nav-drop:hover .nav-drop-menu,
+    .nav-drop:focus-within .nav-drop-menu {
+      opacity: 1;
+      visibility: visible;
+    }
+    .nav-drop-menu li a {
+      display: block;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .nav-drop-menu li a:hover {
+      color: var(--white);
+      background: rgba(26, 58, 92, 0.18);
+      text-decoration: none;
+    }
+    .nav-drop-menu a.active { color: var(--cyan); }
+
+    /* ── hero ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 52vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 3.5rem;
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 70% 20%, rgba(61,122,181,0.16) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 45% at 25% 85%, rgba(123,201,143,0.07) 0%, transparent 55%),
+        linear-gradient(to bottom, rgba(6,7,10,0.1) 0%, var(--bg) 100%);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue-bright);
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: clamp(2.2rem, 6.5vw, 3.8rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      margin-bottom: 0.7rem;
+    }
+    .hero h1 em { color: var(--cyan); font-style: normal; }
+    .hero-tagline {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      font-size: clamp(1rem, 2.3vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 34ch;
+      margin-bottom: 1.8rem;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+    .hero-meta span strong {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ── sections ───────────────────────────────────────── */
+    section {
+      padding: 4rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 1.4rem;
+    }
+    h2 {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+      color: var(--white);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.1rem;
+      line-height: 1.3;
+    }
+    p {
+      color: var(--text-muted);
+      max-width: 68ch;
+      margin-bottom: 1.1rem;
+    }
+    p:last-child { margin-bottom: 0; }
+    .note {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-faint);
+      margin-top: 1rem;
+    }
+    .model-inline {
+      color: var(--cyan);
+      font-family: var(--font-mono);
+    }
+
+    /* ── leaderboard ────────────────────────────────────── */
+    .leaderboard-intro {
+      margin-bottom: 1.6rem;
+    }
+    .lb-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .lb-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .lb-title {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--white);
+      letter-spacing: 0.04em;
+    }
+    .lb-sub {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+    .table-scroll {
+      overflow-x: auto;
+    }
+    table.eval-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      min-width: 800px;
+    }
+    .eval-table th {
+      text-align: left;
+      font-weight: 500;
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .eval-table th.num, .eval-table td.num { text-align: right; }
+    .eval-table td {
+      padding: 0.78rem 1rem;
+      border-bottom: 1px solid rgba(28, 35, 51, 0.6);
+      white-space: nowrap;
+      color: var(--text);
+    }
+    .eval-table tbody tr:last-child td { border-bottom: none; }
+    .eval-table tbody tr:hover td { background: rgba(26, 58, 92, 0.12); }
+
+    .rank {
+      color: var(--blue-bright);
+      font-weight: 500;
+      width: 3.2rem;
+    }
+    .model-cell {
+      font-family: var(--font-sans);
+      font-weight: 500;
+      color: var(--white);
+    }
+    .model-sub {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 400;
+      color: var(--text-faint);
+      margin-top: 0.12rem;
+      letter-spacing: 0.02em;
+    }
+    .index {
+      color: var(--blue-bright);
+      font-weight: 600;
+    }
+    .score { color: var(--green); }
+    .dash  { color: var(--text-faint); }
+    .params { color: var(--text-muted); }
+
+    /* highlighted Myosotis row */
+    tr.highlight td {
+      background: rgba(26, 58, 92, 0.22);
+      border-top: 1px solid var(--blue-dim);
+      border-bottom: 1px solid var(--blue-dim);
+    }
+    tr.highlight:hover td { background: rgba(26, 58, 92, 0.3); }
+    tr.highlight .rank { color: var(--cyan); }
+    tr.highlight .model-cell { color: var(--cyan); }
+    tr.highlight .index { color: var(--cyan); }
+    .you-marker {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-left: 0.6rem;
+    }
+
+    /* omitted rows */
+    tr.more td {
+      text-align: center;
+      padding: 0.55rem 1rem;
+      color: var(--text-faint);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      user-select: none;
+    }
+
+    /* ── checkpoint history ────────────────────────────── */
+    .ckpt-history {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      margin-top: 1.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+    .ckpt-label {
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      color: var(--text-faint);
+    }
+    .ckpt {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.45rem;
+      padding: 0.32rem 0.7rem;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+    .ckpt em { font-style: normal; color: var(--text-muted); }
+    .ckpt-arrow { color: var(--text-faint); }
+    .ckpt.current {
+      border-color: var(--blue-dim);
+      background: rgba(26, 58, 92, 0.25);
+      color: var(--white);
+    }
+    .ckpt.current em { color: var(--cyan); }
+
+    /* ── methodology ────────────────────────────────────── */
+    .formula-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 1.4rem 1.5rem;
+      margin: 1.4rem 0 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .formula-card code {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--cyan);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .formula-card code span { color: var(--text-muted); }
+    .weights-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      margin: 0.4rem 0 1.6rem;
+      max-width: 480px;
+    }
+    .weights-table th {
+      text-align: left;
+      font-weight: 500;
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .weights-table td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid rgba(28, 35, 51, 0.6);
+      color: var(--text);
+    }
+    .weights-table td:last-child { color: var(--text-muted); }
+    .weights-table .weight-key { color: var(--blue-bright); }
+    .weights-table .note-col { color: var(--text-faint); font-size: 0.7rem; }
+    .method-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-width: 68ch;
+      margin-top: 0.4rem;
+    }
+    .method-list li {
+      color: var(--text-muted);
+      padding-left: 1.2rem;
+      position: relative;
+    }
+    .method-list li::before {
+      content: "—";
+      position: absolute;
+      left: 0;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
+    }
+    .method-list li strong { color: var(--text); font-weight: 500; }
+
+    /* ── footer ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0 3.5rem;
+    }
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    .footer-brand {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      line-height: 1.7;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+    }
+    .footer-links a:hover { color: var(--text-muted); }
+
+    /* ── responsive ─────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .nav-links { gap: 0.9rem; }
+      .nav-links a { font-size: 0.7rem; }
+      .hero-meta { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="../../index.html" class="nav-logo">FWKV</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html#about">About</a></li>
+        <li><a href="../../index.html#models">Models</a></li>
+        <li class="nav-drop">
+          <a href="#" class="nav-drop-toggle" aria-haspopup="true">Other</a>
+          <ul class="nav-drop-menu">
+            <li><a href="#" class="active">Eval</a></li>
+            <li><a href="../leaderboard/">Leaderboard</a></li>
+          </ul>
+        </li>
+        <li><a href="../../chat/">Chat</a></li>
+        <li><a href="../../index.html#paper">Paper</a></li>
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Hugging Face</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- hero -->
+  <header class="hero">
+    <div class="hero-glow"></div>
+    <div class="wrap hero-content">
+      <p class="hero-eyebrow">Evaluations · August 2026</p>
+      <h1>Myosotis-1,<br /><em>measured.</em></h1>
+      <p class="hero-tagline">
+        A recurrent model dropped into the transformer small-language-model
+        landscape. No special treatment.
+      </p>
+      <div class="hero-meta">
+        <span><strong>INT index</strong> 6.79</span>
+        <span><strong>checkpoint</strong> 22000</span>
+        <span><strong>benchmarks</strong> 3 / 4</span>
+        <span><strong>ArithMark-3</strong> —</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- leaderboard -->
+    <section id="leaderboard">
+      <div class="wrap">
+        <p class="section-label">Leaderboard</p>
+        <h2>Small language models, ranked.</h2>
+        <p class="leaderboard-intro">
+          The field below lists transformer-based small language models from the
+          Intelligence Index leaderboard, with the top three, the models
+          immediately around Myosotis-1, and Myosotis-1 itself
+          (<span class="model-inline">checkpoint 22000</span>) highlighted for comparison.
+        </p>
+
+        <div class="lb-card">
+          <div class="lb-head">
+            <span class="lb-title">Intelligence Index — small LM landscape</span>
+            <span class="lb-sub">145 entries · sorted by index ↓</span>
+          </div>
+          <div class="table-scroll">
+            <table class="eval-table" aria-label="Small language model leaderboard">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th class="num">Params</th>
+                  <th class="num">Int index</th>
+                  <th class="num">HellaSwag</th>
+                  <th class="num">ARC-easy</th>
+                  <th class="num">ARC-challenge</th>
+                  <th class="num">PIQA</th>
+                  <th class="num">ArithMark-3</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="rank">1</td>
+                  <td class="model-cell">SmolLM2-135M<span class="model-sub">HuggingFace · 135M</span></td>
+                  <td class="num params">135M</td>
+                  <td class="num index">27.13</td>
+                  <td class="num score">43.22</td>
+                  <td class="num score">58.63</td>
+                  <td class="num score">29.69</td>
+                  <td class="num score">68.44</td>
+                  <td class="num score">39.20</td>
+                </tr>
+                <tr>
+                  <td class="rank">2</td>
+                  <td class="model-cell">SmolLM-135M<span class="model-sub">HuggingFace · 135M</span></td>
+                  <td class="num params">135M</td>
+                  <td class="num index">25.74</td>
+                  <td class="num score">42.70</td>
+                  <td class="num score">56.31</td>
+                  <td class="num score">29.01</td>
+                  <td class="num score">68.28</td>
+                  <td class="num score">36.80</td>
+                </tr>
+                <tr>
+                  <td class="rank">3</td>
+                  <td class="model-cell">GPT-X2.5-135M<span class="model-sub">Axiomic Labs · 135M</span></td>
+                  <td class="num params">135M</td>
+                  <td class="num index">25.17</td>
+                  <td class="num score">40.57</td>
+                  <td class="num score">51.81</td>
+                  <td class="num score">29.18</td>
+                  <td class="num score">69.42</td>
+                  <td class="num score">38.40</td>
+                </tr>
+
+                <tr class="more"><td colspan="9">⋮ · 85 models omitted (ranks 4–88) · ⋮</td></tr>
+
+                <tr>
+                  <td class="rank">89</td>
+                  <td class="model-cell">GPT-S-5M<span class="model-sub">Axiomic Labs · 5.2M</span></td>
+                  <td class="num params">5.2M</td>
+                  <td class="num index">6.90</td>
+                  <td class="num score">27.46</td>
+                  <td class="num score">33.21</td>
+                  <td class="num score">21.16</td>
+                  <td class="num score">57.24</td>
+                  <td class="num score">30.20</td>
+                </tr>
+                <tr>
+                  <td class="rank">90</td>
+                  <td class="model-cell">tinyLM-8M-exp<span class="model-sub">User01110 · 8.1M</span></td>
+                  <td class="num params">8.1M</td>
+                  <td class="num index">6.82</td>
+                  <td class="num score">27.65</td>
+                  <td class="num score">35.65</td>
+                  <td class="num score">23.61</td>
+                  <td class="num score">56.51</td>
+                  <td class="num score">27.50</td>
+                </tr>
+
+                <tr class="highlight">
+                  <td class="rank">91</td>
+                  <td class="model-cell">Myosotis-1<span class="you-marker">◈ this model</span><span class="model-sub">FWKV · recurrent · checkpoint 22000</span></td>
+                  <td class="num params">101m</td>
+                  <td class="num index">6.79</td>
+                  <td class="num score">25.64</td>
+                  <td class="num score">34.51</td>
+                  <td class="num score">22.10</td>
+                  <td class="num score">57.56</td>
+                  <td class="num dash">—</td>
+                </tr>
+
+                <tr>
+                  <td class="rank">92</td>
+                  <td class="model-cell">Atom 3.4M<span class="model-sub">UCR · 3.4M</span></td>
+                  <td class="num params">3.4M</td>
+                  <td class="num index">6.37</td>
+                  <td class="num score">27.69</td>
+                  <td class="num score">33.33</td>
+                  <td class="num score">22.10</td>
+                  <td class="num score">55.17</td>
+                  <td class="num score">31.60</td>
+                </tr>
+                <tr>
+                  <td class="rank">93</td>
+                  <td class="model-cell">Pythia-14M<span class="model-sub">EleutherAI · 14M</span></td>
+                  <td class="num params">14M</td>
+                  <td class="num index">6.25</td>
+                  <td class="num score">26.20</td>
+                  <td class="num score">32.28</td>
+                  <td class="num score">20.99</td>
+                  <td class="num score">55.88</td>
+                  <td class="num score">33.40</td>
+                </tr>
+
+                <tr class="more"><td colspan="9">⋮ · 52 models omitted (ranks 94–145) · ⋮</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ckpt-history">
+          <span class="ckpt-label">Checkpoint history</span>
+          <span class="ckpt">11000 <em>INT 5.51</em></span>
+          <span class="ckpt-arrow">→</span>
+          <span class="ckpt">14000 <em>INT 6.12</em></span>
+          <span class="ckpt-arrow">→</span>
+          <span class="ckpt">17000 <em>INT 6.86</em></span>
+          <span class="ckpt-arrow">→</span>
+          <span class="ckpt">20000 <em>INT 6.64</em></span>
+          <span class="ckpt-arrow">→</span>
+          <span class="ckpt current">22000 <em>INT 6.79</em></span>
+        </div>
+
+        <p class="note">
+          Percentages are raw scores on each benchmark. Myosotis-1 uses
+          acc_norm for HellaSwag and ARC and acc for PIQA, matching the
+          leaderboard convention. ArithMark-3 was not evaluated, so its cell
+          and its weight are dropped from the index.
+        </p>
+      </div>
+    </section>
+
+    <!-- methodology -->
+    <section id="method">
+      <div class="wrap">
+        <p class="section-label">Methodology</p>
+        <h2>How the Intelligence Index is calculated</h2>
+        <p>
+          Each benchmark is first adjusted for its random-chance floor, so
+          chance performance maps to 0 and perfect performance maps to 100.
+        </p>
+
+        <div class="formula-card">
+          <code>N(score, chance) = 100 <span>×</span> (score − chance) <span>÷</span> (100 − chance)</code>
+          <code>Int Index = (HellaSwag + ARC + PIQA + 0.65 <span>×</span> ArithMark-3) <span>÷</span> 3.65</code>
+        </div>
+
+        <table class="weights-table" aria-label="Benchmark weights and chance floors">
+          <thead>
+            <tr>
+              <th>Benchmark</th>
+              <th class="num">Weight</th>
+              <th class="num">Chance</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="weight-key">HellaSwag</td>
+              <td class="num">1.00</td>
+              <td class="num">25</td>
+              <td class="note-col">acc_norm</td>
+            </tr>
+            <tr>
+              <td class="weight-key">Combined ARC</td>
+              <td class="num">1.00</td>
+              <td class="num">25</td>
+              <td class="note-col">mean of ARC-Easy + ARC-Challenge, before normalization</td>
+            </tr>
+            <tr>
+              <td class="weight-key">PIQA</td>
+              <td class="num">1.00</td>
+              <td class="num">50</td>
+              <td class="note-col">acc</td>
+            </tr>
+            <tr>
+              <td class="weight-key">ArithMark-3</td>
+              <td class="num">0.65</td>
+              <td class="num">25</td>
+              <td class="note-col">not evaluated for Myosotis-1 → shown as “—”</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ul class="method-list">
+          <li><strong>Combined ARC</strong> is the mean of ARC-Easy and ARC-Challenge before normalization.</li>
+          <li>When a component is unavailable, its weight is removed from both the numerator and the denominator; <strong>at least two components are required</strong>.</li>
+          <li>Scores below chance may be negative.</li>
+          <li>Myosotis-1 was not evaluated on ArithMark-3, so its 0.65 weight is dropped: <strong>(HellaSwag + ARC + PIQA) ÷ 3</strong> = 6.79.</li>
+          <li>Myosotis-1 is a recurrent FWKV model, shown on a leaderboard of transformer-based models for comparison.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        FWKV · Apache 2.0<br />
+        Built by <a href="https://huggingface.co/FlameF0X" target="_blank" rel="noopener">FlameF0X</a>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://fwkv.github.io/privacy/"  target="_blank" rel="noopener">Privacy</a></li>
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Models</a></li>
+        <li><a href="https://flamef0x.github.io/papers/" target="_blank" rel="noopener">Paper</a></li>
+        <li><a href="https://flamef0x.github.io/blog/" target="_blank" rel="noopener">Blog</a></li>
+      </ul>
+    </div>
+  </footer>
+
+</body>
+</html>
