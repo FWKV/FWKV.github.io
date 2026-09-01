@@ -383,6 +383,7 @@
       font-weight: 600;
     }
     .score { color: var(--green); }
+    .ppl   { color: var(--amber); }
     .dash  { color: var(--text-faint); }
     .params { color: var(--text-muted); }
     .pending {
@@ -581,7 +582,7 @@
 
       <div class="hero-meta">
         <span><strong>Brackets</strong> 2</span>
-        <span><strong>Benchmarks</strong> 5 +</span>
+        <span><strong>Benchmarks</strong> 11</span>
         <span><strong>Submission</strong> lm-eval-harness</span>
       </div>
     </div>
@@ -604,141 +605,36 @@
         <p>
           Rows are added from self-submitted lm-eval-harness runs. A row is
           only ranked once its results are posted with the exact command used.
-          Ranks below reflect submitted, reproducible results only.
+          Ranks below reflect submitted, reproducible results only. AVG is
+          computed automatically from the raw scores you enter — no manual
+          math needed.
         </p>
 
         <!-- hybrid -->
-        <div class="bracket">
+        <div class="bracket" id="bracket-hybrid">
           <div class="bracket-head">
             <span class="bracket-title">Hybrid</span>
             <span class="bracket-tag hybrid">attention + recurrent / SSM</span>
           </div>
           <div class="table-scroll">
             <table class="lb-table" aria-label="Hybrid non-transformer leaderboard">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Model</th>
-                  <th class="num">Params</th>
-                  <th class="num">Avg</th>
-                  <th class="num">HellaSwag</th>
-                  <th class="num">ARC-easy</th>
-                  <th class="num">ARC-challenge</th>
-                  <th class="num">PIQA</th>
-                  <th class="num">NITHS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="rank">—</td>
-                  <td class="model-cell">Hymba<span class="model-sub">hybrid attention + Mamba · NVIDIA</span></td>
-                  <td class="num params">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                </tr>
-                <tr>
-                  <td class="rank">—</td>
-                  <td class="model-cell">Samba<span class="model-sub">hybrid Mamba + attention · Microsoft</span></td>
-                  <td class="num params">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                </tr>
-                <tr>
-                  <td class="rank">—</td>
-                  <td class="model-cell">Zamba<span class="model-sub">hybrid attention + Mamba2 · Zyphra</span></td>
-                  <td class="num params">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                </tr>
-                <tr class="open-slot"><td colspan="9">+ your hybrid model here — submit results below</td></tr>
-              </tbody>
+              <thead id="thead-hybrid"></thead>
+              <tbody id="tbody-hybrid"></tbody>
             </table>
           </div>
           <p class="note">Known hybrid families shown as placeholders until results are submitted.</p>
         </div>
 
         <!-- pure -->
-        <div class="bracket">
+        <div class="bracket" id="bracket-pure">
           <div class="bracket-head">
             <span class="bracket-title">Pure</span>
             <span class="bracket-tag pure">RNN + SSM</span>
           </div>
           <div class="table-scroll">
             <table class="lb-table" aria-label="Pure non-transformer leaderboard">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Model</th>
-                  <th class="num">Params</th>
-                  <th class="num">Avg</th>
-                  <th class="num">HellaSwag</th>
-                  <th class="num">ARC-easy</th>
-                  <th class="num">ARC-challenge</th>
-                  <th class="num">PIQA</th>
-                  <th class="num">NITHS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="rank">—</td>
-                  <td class="model-cell">RWKV-6<span class="model-sub">pure RNN · RWKV Community</span></td>
-                  <td class="num params">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                </tr>
-                <tr>
-                  <td class="rank">—</td>
-                  <td class="model-cell">Mamba-2<span class="model-sub">pure SSM · Mamba</span></td>
-                  <td class="num params">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                </tr>
-
-                <tr class="highlight">
-                  <td class="rank">1</td>
-                  <td class="model-cell">Myosotis-1<span class="you-marker">◈ FWKV</span><span class="model-sub">pure RNN · FWKV · checkpoint 22000</span></td>
-                  <td class="num params">101m</td>
-                  <td class="num avg">6.20</td>
-                  <td class="num score">25.64</td>
-                  <td class="num score">34.51</td>
-                  <td class="num score">22.10</td>
-                  <td class="num score">57.56</td>
-                  <td class="num dash">—</td>
-                </tr>
-
-                <tr>
-                  <td class="rank">—</td>
-                  <td class="model-cell">S4<span class="model-sub">pure SSM · Stanford</span></td>
-                  <td class="num params">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                  <td class="num dash">—</td>
-                </tr>
-                <tr class="open-slot"><td colspan="9">+ your RNN / SSM model here — submit results below</td></tr>
-              </tbody>
+              <thead id="thead-pure"></thead>
+              <tbody id="tbody-pure"></tbody>
             </table>
           </div>
           <p class="note">Myosotis-1 is the first submitted row. Placeholders are awaiting results.</p>
@@ -760,9 +656,10 @@
           <code>AVG = mean(N) <span>over available benchmarks</span></code>
         </div>
         <ul class="method-list">
-          <li><strong>Chance floors:</strong> HellaSwag 25 · ARC-easy 25 · ARC-challenge 25 · PIQA 50.</li>
+          <li><strong>Chance floors:</strong> HellaSwag 25 · ARC-easy 25 · ARC-challenge 25 · PIQA 50 · GSM8K 0 · MMLU 25 · MMLU-Pro 10 · Arithmetic 0 · ASDiv 0 · GLUE 50 (majority baseline).</li>
           <li>Missing benchmarks are excluded from that model's AVG; <strong>at least two are required</strong>.</li>
-          <li><strong>NITHS</strong> is displayed but not counted toward AVG until a chance floor is agreed on.</li>
+          <li><strong>WikiText</strong> is word perplexity — lower is better — so it is displayed but never counted toward AVG.</li>
+          <li>The AVG is computed automatically on the page from the raw scores; submitters never calculate it by hand.</li>
           <li>Extra benchmarks can be added on submission; they join the AVG once their floor is defined.</li>
           <li>Scores below chance may be negative.</li>
         </ul>
@@ -782,11 +679,11 @@
         </p>
         <div class="cmd"><code>lm_eval --model hf \
   --model_args pretrained=&lt;model_id&gt; \
-  --tasks hellaswag,arc_easy,arc_challenge,piqa,niths \
+  --tasks hellaswag,arc_easy,arc_challenge,piqa,gsm8k,mmlu,mmlu_pro,wikitext,arithmetic,asdiv,glue \
   --batch_size auto \
   --output_path results.json</code></div>
         <ol class="submit-steps">
-          <li><strong>Run the harness</strong> — include <code>hellaswag</code>, <code>arc_easy</code>, <code>arc_challenge</code>, <code>piqa</code>, and <code>niths</code> if your model supports it.</li>
+          <li><strong>Run the harness</strong> — <code>hellaswag</code>, <code>arc_easy</code>, <code>arc_challenge</code>, <code>piqa</code>, <code>gsm8k</code>, <code>mmlu</code>, <code>mmlu_pro</code>, <code>wikitext</code>, <code>arithmetic</code>, <code>asdiv</code>, and <code>glue</code>. WikiText is optional if you'd rather not report perplexity.</li>
           <li><strong>Collect the output</strong> — model name, architecture class (<code>hybrid</code> / <code>rnn</code> / <code>ssm</code>), param count, and checkpoint/step.</li>
           <li><strong>Note the exact command</strong> and the <code>lm-eval-harness</code> commit for verification.</li>
           <li><strong>Submit</strong> — open an issue or pull request on the site repository
@@ -813,6 +710,132 @@
       </ul>
     </div>
   </footer>
+
+  <script>
+    /* ── benchmarks ────────────────────────────────────────────
+       Scores are raw percentages (0–100) from lm-eval-harness.
+       floor = random-chance floor used to normalize each score
+       ppl   = true → word perplexity (lower is better), excluded from AVG
+    */
+    const BENCHMARKS = [
+      { key: "hellaswag",     label: "HellaSwag",    floor: 25 },
+      { key: "arc_easy",      label: "ARC-easy",     floor: 25 },
+      { key: "arc_challenge", label: "ARC-challenge",floor: 25 },
+      { key: "piqa",          label: "PIQA",         floor: 50 },
+      { key: "gsm8k",         label: "GSM8K",        floor: 0 },
+      { key: "mmlu",          label: "MMLU",         floor: 25 },
+      { key: "mmlu_pro",      label: "MMLU-Pro",     floor: 10 },
+      { key: "wikitext",      label: "WikiText",     floor: null, ppl: true },
+      { key: "arithmetic",    label: "Arithmetic",   floor: 0 },
+      { key: "asdiv",         label: "ASDiv",        floor: 0 },
+      { key: "glue",          label: "GLUE",         floor: 50 },
+    ];
+
+    /* ── brackets + models ────────────────────────────────────
+       Add a model by appending an entry to its bracket's `models`.
+       scores keys must match BENCHMARKS keys; omitted → shown as “—”.
+       highlight / you mark a row; params is a short string like "101m".
+    */
+    const BRACKETS = [
+      {
+        id: "hybrid",
+        title: "Hybrid",
+        models: [
+          { name: "Hymba",   sub: "hybrid attention + Mamba · NVIDIA" },
+          { name: "Samba",   sub: "hybrid Mamba + attention · Microsoft" },
+          { name: "Zamba",   sub: "hybrid attention + Mamba2 · Zyphra" },
+          { openSlot: true, text: "+ your hybrid model here — submit results below" },
+        ],
+      },
+      {
+        id: "pure",
+        title: "Pure",
+        models: [
+          { name: "RWKV-6",  sub: "pure RNN · RWKV Community" },
+          { name: "Mamba-2", sub: "pure SSM · Mamba" },
+          {
+            name: "Myosotis-1", sub: "pure RNN · FWKV · checkpoint 22000",
+            params: "101m", highlight: true, you: true,
+            scores: { hellaswag: 25.64, arc_easy: 34.51, arc_challenge: 22.10, piqa: 57.56 },
+          },
+          { name: "S4",      sub: "pure SSM · Stanford" },
+          { openSlot: true, text: "+ your RNN / SSM model here — submit results below" },
+        ],
+      },
+    ];
+
+    /* ── AVG math ───────────────────────────────────────────── */
+    const normalize = (score, floor) => 100 * (score - floor) / (100 - floor);
+
+    function avgFor(model) {
+      const parts = [];
+      for (const b of BENCHMARKS) {
+        if (b.ppl) continue;                       // perplexity: never averaged
+        const s = model.scores && model.scores[b.key];
+        if (s == null) continue;
+        parts.push(normalize(s, b.floor));
+      }
+      if (parts.length < 2) return null;           // at least two required
+      return parts.reduce((a, v) => a + v, 0) / parts.length;
+    }
+
+    /* ── render ─────────────────────────────────────────────── */
+    const fmt = (n) => (typeof n === "number" ? n.toFixed(2) : n);
+
+    function headerHTML() {
+      let h = '<th>Rank</th><th>Model</th><th class="num">Params</th><th class="num">Avg</th>';
+      for (const b of BENCHMARKS) {
+        const tip = b.ppl
+          ? ' title="Word perplexity — lower is better; not counted toward AVG"'
+          : ` title="Raw score; AVG normalizes it off a chance floor of ${b.floor}"`;
+        h += `<th class="num"${tip}>${b.label}${b.ppl ? " ↓" : ""}</th>`;
+      }
+      return h;
+    }
+
+    function rowHTML(model, rank) {
+      if (model.openSlot) {
+        return `<tr class="open-slot"><td colspan="${3 + BENCHMARKS.length}">${model.text}</td></tr>`;
+      }
+      const cls = model.highlight ? ' class="highlight"' : "";
+      const rankCell = rank == null
+        ? '<td class="rank">—</td>'
+        : `<td class="rank">${rank}</td>`;
+      const you = model.you ? '<span class="you-marker">◈ FWKV</span>' : "";
+      let html = `<tr${cls}>${rankCell}`;
+      html += `<td class="model-cell">${model.name}${you}<span class="model-sub">${model.sub}</span></td>`;
+      html += `<td class="num params">${model.params || "—"}</td>`;
+      html += model.avg == null
+        ? '<td class="num dash">—</td>'
+        : `<td class="num avg">${fmt(model.avg)}</td>`;
+      for (const b of BENCHMARKS) {
+        const s = model.scores && model.scores[b.key];
+        if (s == null) {
+          html += '<td class="num dash">—</td>';
+        } else if (b.ppl) {
+          html += `<td class="num ppl">${fmt(s)}</td>`;
+        } else {
+          html += `<td class="num score">${fmt(s)}</td>`;
+        }
+      }
+      return html + "</tr>";
+    }
+
+    function render() {
+      for (const br of BRACKETS) {
+        for (const m of br.models) m.avg = m.openSlot ? null : avgFor(m);
+        const ranked = br.models.filter((m) => m.avg != null).sort((a, b) => b.avg - a.avg);
+        const rankedSet = new Set(ranked);
+        const order = ranked.concat(br.models.filter((m) => !rankedSet.has(m)));
+        const rankOf = new Map(ranked.map((m, i) => [m, i + 1]));
+        document.getElementById("thead-" + br.id).innerHTML = "<tr>" + headerHTML() + "</tr>";
+        document.getElementById("tbody-" + br.id).innerHTML =
+          order.map((m) => rowHTML(m, rankOf.get(m) ?? null)).join("");
+      }
+    }
+
+    render();
+  </script>
 
 </body>
 </html>
