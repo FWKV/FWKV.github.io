@@ -4,18 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Eval — FWKV</title>
-  <meta name="description" content="Myosotis-1 (checkpoint 11000) measured against the small language model landscape. Intelligence Index leaderboard." />
+  <meta name="description" content="Myosotis-1 (final release) measured against the small language model landscape. Intelligence Index leaderboard." />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Eval — FWKV" />
-  <meta property="og:description" content="Myosotis-1 (checkpoint 11000) measured against the small language model landscape. Intelligence Index leaderboard." />
+  <meta property="og:description" content="Myosotis-1 (final release) measured against the small language model landscape. Intelligence Index leaderboard." />
   <meta property="og:image" content="https://cdn-uploads.huggingface.co/production/uploads/6615494716917dfdc645c44e/k839qGKNniqOM_4PdpvoG.png" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Eval — FWKV" />
-  <meta name="twitter:description" content="Myosotis-1 (checkpoint 11000) measured against the small language model landscape. Intelligence Index leaderboard." />
+  <meta name="twitter:description" content="Myosotis-1 (final release) measured against the small language model landscape. Intelligence Index leaderboard." />
   <meta name="twitter:image" content="https://cdn-uploads.huggingface.co/production/uploads/6615494716917dfdc645c44e/k839qGKNniqOM_4PdpvoG.png" />
 
   <meta name="theme-color" content="#3d7ab5" />
@@ -397,40 +397,6 @@
       user-select: none;
     }
 
-    /* ── checkpoint history ────────────────────────────── */
-    .ckpt-history {
-      display: flex;
-      align-items: center;
-      gap: 0.9rem;
-      flex-wrap: wrap;
-      margin-top: 1.2rem;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-    }
-    .ckpt-label {
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-size: 0.68rem;
-      color: var(--text-faint);
-    }
-    .ckpt {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 0.45rem;
-      padding: 0.32rem 0.7rem;
-      border: 1px solid var(--border);
-      background: var(--bg-elevated);
-      color: var(--text);
-    }
-    .ckpt em { font-style: normal; color: var(--text-muted); }
-    .ckpt-arrow { color: var(--text-faint); }
-    .ckpt.current {
-      border-color: var(--blue-dim);
-      background: rgba(26, 58, 92, 0.25);
-      color: var(--white);
-    }
-    .ckpt.current em { color: var(--cyan); }
-
     /* ── methodology ────────────────────────────────────── */
     .formula-card {
       background: var(--bg-elevated);
@@ -549,6 +515,7 @@
           <ul class="nav-drop-menu">
             <li><a href="#" class="active">Eval</a></li>
             <li><a href="../leaderboard/">Leaderboard</a></li>
+            <li><a href="../blog/">Blog</a></li>
           </ul>
         </li>
         <li><a href="../../chat/">Chat</a></li>
@@ -564,8 +531,8 @@
     <div class="wrap hero-content">
       <h1>Myosotis-1,<br /><em>measured.</em></h1>
       <div class="hero-meta">
-        <span><strong>INT index</strong> 6.76</span>
-        <span><strong>checkpoint</strong> 28000</span>
+        <span><strong>INT index</strong> 6.71</span>
+        <span><strong>release</strong> final</span>
         <span><strong>benchmarks</strong> 3 / 4</span>
         <span><strong>ArithMark-3</strong> —</span>
       </div>
@@ -583,7 +550,7 @@
           The field below lists transformer-based small language models from the
           Intelligence Index leaderboard, with the top three, the models
           immediately around Myosotis-1, and Myosotis-1 itself
-          (<span class="model-inline">checkpoint 28000</span>) highlighted for comparison.
+          highlighted for comparison.
         </p>
 
         <div class="lb-card">
@@ -599,11 +566,11 @@
                   <th>Model</th>
                   <th class="num">Params</th>
                   <th class="num">Int index</th>
-                  <th class="num">HellaSwag</th>
-                  <th class="num">ARC-easy</th>
-                  <th class="num">ARC-challenge</th>
-                  <th class="num">PIQA</th>
-                  <th class="num">ArithMark-3</th>
+                  <th class="num">HellaSwag (%)</th>
+                  <th class="num">ARC-easy (%)</th>
+                  <th class="num">ARC-challenge (%)</th>
+                  <th class="num">PIQA (%)</th>
+                  <th class="num">ArithMark-3 (%)</th>
                 </tr>
               </thead>
               <tbody>
@@ -668,14 +635,14 @@
 
                 <tr class="highlight">
                   <td class="rank">91</td>
-                  <td class="model-cell">Myosotis-1<span class="you-marker">◈ this model</span><span class="model-sub">FWKV · recurrent · checkpoint 28000</span></td>
+                  <td class="model-cell">Myosotis-1-base<span class="you-marker">◈ our first model</span><span class="model-sub">FWKV · recurrent</span></td>
                   <td class="num params">101m</td>
-                  <td class="num index">6.76</td>
-                  <td class="num score">25.73</td>
-                  <td class="num score">34.55</td>
-                  <td class="num score">21.42</td>
-                  <td class="num score">57.67</td>
-                  <td class="num dash">—</td>
+                  <td class="num index">6.82</td>
+                  <td class="num score">26.21</td>
+                  <td class="num score">34.34</td>
+                  <td class="num score">21.59</td>
+                  <td class="num score">55.33</td>
+                  <td class="num dash">35.00</td>
                 </tr>
 
                 <tr>
@@ -705,21 +672,6 @@
               </tbody>
             </table>
           </div>
-        </div>
-
-        <div class="ckpt-history">
-          <span class="ckpt-label">Checkpoint history</span>
-          <span class="ckpt">11000 <em>INT 5.51</em></span>
-          <span class="ckpt-arrow">→</span>
-          <span class="ckpt">14000 <em>INT 6.12</em></span>
-          <span class="ckpt-arrow">→</span>
-          <span class="ckpt">17000 <em>INT 6.86</em></span>
-          <span class="ckpt-arrow">→</span>
-          <span class="ckpt">20000 <em>INT 6.64</em></span>
-          <span class="ckpt-arrow">→</span>
-          <span class="ckpt">22000 <em>INT 6.79</em></span>
-          <span class="ckpt-arrow">→</span>
-          <span class="ckpt current">28000 <em>INT 6.76</em></span>
         </div>
 
         <p class="note">
@@ -787,7 +739,7 @@
           <li><strong>Combined ARC</strong> is the mean of ARC-Easy and ARC-Challenge before normalization.</li>
           <li>When a component is unavailable, its weight is removed from both the numerator and the denominator; <strong>at least two components are required</strong>.</li>
           <li>Scores below chance may be negative.</li>
-          <li>Myosotis-1 was not evaluated on ArithMark-3, so its 0.65 weight is dropped: <strong>(HellaSwag + ARC + PIQA) ÷ 3</strong> = 6.76.</li>
+          <li>Myosotis-1 was not evaluated on ArithMark-3, so its 0.65 weight is dropped: <strong>(HellaSwag + ARC + PIQA) ÷ 3</strong> = 6.71.</li>
           <li>Myosotis-1 is a recurrent FWKV model, shown on a leaderboard of transformer-based models for comparison.</li>
         </ul>
       </div>
@@ -805,7 +757,7 @@
         <li><a href="https://fwkv.github.io/privacy/"  target="_blank" rel="noopener">Privacy</a></li>
         <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Models</a></li>
         <li><a href="https://flamef0x.github.io/papers/" target="_blank" rel="noopener">Paper</a></li>
-        <li><a href="https://flamef0x.github.io/blog/" target="_blank" rel="noopener">Blog</a></li>
+        <li><a href="../blog/">Blog</a></li>
       </ul>
     </div>
   </footer>

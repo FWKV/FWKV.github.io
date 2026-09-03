@@ -1,0 +1,23 @@
+{
+  "blog": {
+    "title": "FWKV Blog",
+    "description": "Releases, notes and technical write-ups from the FWKV project.",
+    "hero": "/assets/ascii-art-hero.png",
+    "index": "content/",
+    "indexExtension": ".md"
+  },
+  "posts": [
+    {
+      "slug": "myosotis-1-base",
+      "title": "Myosotis-1-base (100M)",
+      "subtitle": "Our first flagship release — a 100M recurrent language model built on the FWKV architecture.",
+      "date": "2026-09-03",
+      "author": "FlameF0X",
+      "tags": ["release", "model", "fwkv", "100m"],
+      "hero": "/assets/ascii-art-myosotis-1.png",
+      "excerpt": "Myosotis-1-base is the first flagship release from FWKV — a 100M recurrent language model with a mathematically clamped exponential decay that guarantees an infinite effective context window at blazing-fast CPU/GPU speeds.",
+      "contentFile": "content/myosotis-1-base.md",
+      "readingMinutes": 5
+    }
+  ]
+}

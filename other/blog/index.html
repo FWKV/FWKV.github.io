@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — FWKV</title>
+  <meta name="description" content="Releases, notes and technical write-ups from the FWKV project." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Blog — FWKV" />
+  <meta property="og:description" content="Releases, notes and technical write-ups from the FWKV project." />
+  <meta property="og:image" content="https://cdn-uploads.huggingface.co/production/uploads/6615494716917dfdc645c44e/k839qGKNniqOM_4PdpvoG.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Blog — FWKV" />
+  <meta name="twitter:description" content="Releases, notes and technical write-ups from the FWKV project." />
+  <meta name="twitter:image" content="https://cdn-uploads.huggingface.co/production/uploads/6615494716917dfdc645c44e/k839qGKNniqOM_4PdpvoG.png" />
+
+  <meta name="theme-color" content="#3d7ab5" />
+
+  <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/sro4XOnALHB4GmjOLxiZC.png" type="image/png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- KaTeX (math) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+
+  <style>
+    /* ── tokens ─────────────────────────────────────────── */
+    :root {
+      --bg:           #06070a;
+      --bg-elevated: #0c0e14;
+      --surface:     #10131c;
+      --border:      #1c2333;
+      --blue-dim:    #1a3a5c;
+      --blue:        #3d7ab5;
+      --blue-bright: #6ba8e0;
+      --cyan:        #8ec8f0;
+      --green:       #7bc98f;
+      --amber:       #d9a24b;
+      --red:         #d96a5a;
+      --text:        #d8e0ec;
+      --text-muted:  #7a8ba0;
+      --text-faint:  #4a5a6e;
+      --white:       #f0f4fa;
+      --radius:      2px;
+      --font-mono:   "IBM Plex Mono", ui-monospace, monospace;
+      --font-sans:   "IBM Plex Sans", system-ui, sans-serif;
+    }
+
+    /* ── reset ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img, video { display: block; max-width: 100%; }
+    a { color: var(--blue-bright); text-decoration: none; }
+    a:hover { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+    /* ── grain overlay ─────────────────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── layout shell ───────────────────────────────────── */
+    .wrap {
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+
+    /* ── nav ────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6, 7, 10, 0.82);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      width: min(920px, 92vw);
+      margin-inline: auto;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo:hover { color: var(--cyan); text-decoration: none; }
+    .nav-links {
+      display: flex;
+      gap: 1.6rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--blue-bright); }
+
+    /* ── "Other" dropdown ───────────────────────────────── */
+    .nav-drop { position: relative; }
+    .nav-drop-toggle { cursor: default; }
+    .nav-drop-toggle::after {
+      content: "▾";
+      margin-left: 0.35rem;
+      font-size: 0.7rem;
+      color: var(--text-faint);
+    }
+    .nav-drop-menu {
+      position: absolute;
+      top: calc(100% + 0.4rem);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 150px;
+      list-style: none;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+      z-index: 300;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+    .nav-drop-menu::before {
+      content: "";
+      position: absolute;
+      top: -0.4rem;
+      left: 0;
+      right: 0;
+      height: 0.4rem;
+    }
+    .nav-drop:hover .nav-drop-menu,
+    .nav-drop:focus-within .nav-drop-menu {
+      opacity: 1;
+      visibility: visible;
+    }
+    .nav-drop-menu li a {
+      display: block;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .nav-drop-menu li a:hover {
+      color: var(--white);
+      background: rgba(26, 58, 92, 0.18);
+      text-decoration: none;
+    }
+    .nav-drop-menu a.active { color: var(--cyan); }
+
+    /* ── hero ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 52vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 3.5rem;
+      overflow: hidden;
+    }
+    .hero.is-post {
+      min-height: 48vh;
+      padding-bottom: 3.2rem;
+    }
+    .hero-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0.5;
+      filter: contrast(1.1) brightness(0.85);
+    }
+    .hero.is-post .hero-img { opacity: 0.42; }
+    .hero-fade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(6, 7, 10, 0.2) 0%, rgba(6, 7, 10, 0.6) 55%, var(--bg) 100%),
+        radial-gradient(ellipse 80% 60% at 50% 40%, transparent 30%, rgba(6, 7, 10, 0.7) 100%);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue-bright);
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: clamp(2.2rem, 6.5vw, 3.8rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      margin-bottom: 0.7rem;
+    }
+    .hero h1 em { color: var(--cyan); font-style: normal; }
+    .hero-tagline {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      font-size: clamp(1rem, 2.3vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 46ch;
+      margin-bottom: 1.4rem;
+    }
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+    .hero-meta span strong {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ── tag chips ──────────────────────────────────────── */
+    .tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue-bright);
+      background: rgba(26, 58, 92, 0.22);
+      border: 1px solid rgba(26, 58, 92, 0.8);
+      padding: 0.22rem 0.55rem;
+      border-radius: 9999px;
+    }
+
+    /* ── sections ───────────────────────────────────────── */
+    section {
+      padding: 4rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 1.6rem;
+    }
+    .empty-note {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-faint);
+    }
+
+    /* ── post list ──────────────────────────────────────── */
+    .post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .post-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.6rem 1.7rem;
+      text-decoration: none;
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+    }
+    .post-card:hover {
+      background: var(--bg-elevated);
+      border-color: var(--blue-dim);
+      text-decoration: none;
+      transform: translateY(-2px);
+    }
+    .post-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .post-date {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+    .post-author {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+    .post-title {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: clamp(1.25rem, 3vw, 1.5rem);
+      color: var(--white);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+    .post-card:hover .post-title { color: var(--cyan); }
+    .post-subtitle {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      max-width: 70ch;
+    }
+    .post-excerpt {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      max-width: 70ch;
+      opacity: 0.85;
+    }
+    .post-card-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+    }
+    .post-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .post-cta {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      color: var(--blue-bright);
+      white-space: nowrap;
+    }
+    .post-card:hover .post-cta { color: var(--cyan); }
+
+    /* ── single post ────────────────────────────────────── */
+    .post-section { padding: 3.5rem 0 5rem; }
+    .back-link {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2.2rem;
+    }
+    .back-link:hover { color: var(--cyan); text-decoration: none; }
+    .md-loading, .md-error {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      padding: 2rem 0;
+    }
+    .md-error { color: var(--red); }
+
+    /* ── markdown typography ────────────────────────────── */
+    .md-content {
+      line-height: 1.75;
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+    .md-content > :first-child { margin-top: 0; }
+    .md-content h1,
+    .md-content h2,
+    .md-content h3,
+    .md-content h4,
+    .md-content h5,
+    .md-content h6 {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      color: var(--white);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      scroll-margin-top: 96px;
+    }
+    .md-content h1 {
+      font-size: clamp(1.5rem, 3.4vw, 1.9rem);
+      margin: 0 0 1.3rem;
+    }
+    .md-content h2 {
+      font-size: clamp(1.25rem, 3vw, 1.55rem);
+      margin: 2.8rem 0 1.1rem;
+      padding-top: 0.3rem;
+    }
+    .md-content h3 {
+      font-size: 1.08rem;
+      margin: 2.2rem 0 0.8rem;
+    }
+    .md-content h4 {
+      font-size: 0.92rem;
+      color: var(--blue-bright);
+      margin: 1.8rem 0 0.6rem;
+    }
+    .md-content p {
+      color: var(--text-muted);
+      max-width: 70ch;
+      margin-bottom: 1.15rem;
+    }
+    .md-content p:last-child { margin-bottom: 0; }
+    .md-content strong { color: var(--text); font-weight: 600; }
+    .md-content a { border-bottom: 1px solid rgba(107, 168, 224, 0.25); }
+    .md-content a:hover { text-decoration: none; border-bottom-color: var(--cyan); }
+
+    .md-content ul,
+    .md-content ol {
+      color: var(--text-muted);
+      margin: 0 0 1.3rem 0;
+      padding-left: 1.5rem;
+    }
+    .md-content li { margin-bottom: 0.45rem; }
+    .md-content li > ul,
+    .md-content li > ol { margin: 0.45rem 0 0; }
+    .md-content li strong { color: var(--text); font-weight: 500; }
+
+    .md-content blockquote {
+      margin: 1.5rem 0;
+      padding: 0.25rem 0 0.25rem 1.25rem;
+      border-left: 2px solid var(--blue-dim);
+      color: var(--text-muted);
+    }
+    .md-content blockquote p { margin-bottom: 0.6rem; }
+    .md-content blockquote p:last-child { margin-bottom: 0; }
+
+    .md-content code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      color: var(--cyan);
+      background: rgba(26, 58, 92, 0.2);
+      border: 1px solid rgba(28, 35, 51, 0.9);
+      border-radius: var(--radius);
+      padding: 0.08em 0.4em;
+    }
+    .md-content .code-block {
+      position: relative;
+      margin: 1.6rem 0;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      overflow: hidden;
+    }
+    .codebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.45rem 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .codebar .code-lang {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+    .codebar .copy-btn {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.18rem 0.55rem;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .codebar .copy-btn:hover { color: var(--cyan); border-color: var(--blue-dim); }
+    .md-content pre {
+      margin: 0;
+      padding: 1.1rem 1.2rem;
+      overflow-x: auto;
+    }
+    .md-content pre code {
+      display: block;
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--text);
+      font-size: 0.8rem;
+      line-height: 1.7;
+    }
+
+    .md-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.6rem 0;
+    }
+
+    .md-content img {
+      margin: 1.6rem auto;
+      border: 1px solid var(--border);
+    }
+
+    /* tables */
+    .md-content .table-scroll {
+      margin: 1.6rem 0;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .md-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      min-width: 520px;
+    }
+    .md-content th {
+      text-align: left;
+      font-weight: 500;
+      font-size: 0.64rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .md-content td {
+      padding: 0.72rem 1rem;
+      border-bottom: 1px solid rgba(28, 35, 51, 0.6);
+      color: var(--text);
+      vertical-align: top;
+    }
+    .md-content tbody tr:last-child td { border-bottom: none; }
+    .md-content td code { font-size: 0.95em; }
+
+    /* GitHub-style callouts */
+    .callout {
+      margin: 1.6rem 0;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--blue);
+      background: rgba(26, 58, 92, 0.16);
+    }
+    .callout-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue-bright);
+      margin-bottom: 0.4rem;
+    }
+    .callout p { color: var(--text-muted); max-width: 70ch; margin-bottom: 0.4rem; }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout.tip { border-left-color: var(--green); background: rgba(123, 201, 143, 0.07); }
+    .callout.tip .callout-title { color: var(--green); }
+    .callout.warning,
+    .callout.caution { border-left-color: var(--amber); background: rgba(217, 162, 75, 0.07); }
+    .callout.warning .callout-title,
+    .callout.caution .callout-title { color: var(--amber); }
+    .callout.important { border-left-color: var(--red); background: rgba(217, 106, 90, 0.08); }
+    .callout.important .callout-title { color: var(--red); }
+
+    /* center-div helper (from raw html in posts) */
+    .md-content .center-div { text-align: center; }
+    .md-content .center-div em {
+      display: block;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin: 1.5rem 0;
+    }
+
+    /* KaTeX */
+    .md-content .katex-display {
+      margin: 1.6rem 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.3rem 0;
+    }
+
+    .post-footer-cta {
+      margin-top: 3rem;
+      padding-top: 1.6rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--bg);
+      background: var(--blue-bright);
+      border: none;
+      padding: 0.65rem 1.15rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: var(--cyan);
+      color: var(--bg);
+      text-decoration: none;
+    }
+    .btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+    /* ── footer ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0 3.5rem;
+    }
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    .footer-brand {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      line-height: 1.7;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-faint);
+    }
+    .footer-links a:hover { color: var(--text-muted); }
+
+    /* ── responsive ─────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .nav-links { gap: 0.9rem; }
+      .nav-links a { font-size: 0.7rem; }
+      .hero-meta { gap: 1rem; }
+      .post-card { padding: 1.3rem 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="../../index.html" class="nav-logo">FWKV</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html#about">About</a></li>
+        <li><a href="../../index.html#models">Models</a></li>
+        <li class="nav-drop">
+          <a href="#" class="nav-drop-toggle" aria-haspopup="true">Other</a>
+          <ul class="nav-drop-menu">
+            <li><a href="../eval/">Eval</a></li>
+            <li><a href="../leaderboard/">Leaderboard</a></li>
+            <li><a href="#" class="active">Blog</a></li>
+          </ul>
+        </li>
+        <li><a href="../../chat/">Chat</a></li>
+        <li><a href="../../index.html#paper">Paper</a></li>
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Hugging Face</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- hero (swapped between the blog index and an article's own banner) -->
+  <header class="hero" id="hero">
+    <img class="hero-img" id="heroImg" src="/assets/ascii-art-hero.png" alt="FWKV ASCII Art Banner" />
+    <div class="hero-fade"></div>
+    <div class="wrap hero-content" id="heroContent"></div>
+  </header>
+
+  <main id="view"></main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        FWKV · Apache 2.0<br />
+        Built by <a href="https://huggingface.co/FlameF0X" target="_blank" rel="noopener">FlameF0X</a>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://fwkv.github.io/privacy/" target="_blank" rel="noopener">Privacy</a></li>
+        <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Models</a></li>
+        <li><a href="https://flamef0x.github.io/papers/" target="_blank" rel="noopener">Paper</a></li>
+        <li><a href=".">Blog</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- markdown / sanitizer / math libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+  <noscript>
+    <p style="text-align:center;padding:2rem;color:#4a5a6e;font-family:monospace;">
+      The FWKV blog needs JavaScript to load posts from blog.json.
+    </p>
+  </noscript>
+
+  <script>
+  (function () {
+    "use strict";
+
+    var $ = function (sel) { return document.querySelector(sel); };
+
+    var heroEl     = $("#hero");
+    var heroImg    = $("#heroImg");
+    var heroContent= $("#heroContent");
+    var view       = $("#view");
+
+    var data = null;
+    var dataPromise = null;
+
+    var BLOG_FILE = "blog.json";
+
+    /* ── helpers ─────────────────────────────────────────── */
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return "";
+      var d = new Date(String(iso).length === 10 ? iso + "T00:00:00" : iso);
+      if (isNaN(d.getTime())) return iso;
+      return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    }
+
+    function slugFromHash() {
+      var m = location.hash.match(/^#\/post\/([A-Za-z0-9\-_]+)/);
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+
+    function readingTime(text) {
+      var words = (String(text || "").trim().match(/\S+/g) || []).length;
+      return Math.max(1, Math.round(words / 220));
+    }
+
+    function scrollTop() {
+      try { window.scrollTo({ top: 0, behavior: "auto" }); }
+      catch (e) { window.scrollTo(0, 0); }
+    }
+
+    function setHeroImg(src, alt) {
+      if (src) heroImg.src = src;
+      heroImg.alt = alt || "";
+    }
+
+    /* ── data loading ────────────────────────────────────── */
+    function loadBlog() {
+      if (dataPromise) return dataPromise;
+      dataPromise = fetch(BLOG_FILE, { cache: "no-cache" }).then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      }).then(function (json) {
+        data = json;
+        return data;
+      });
+      return dataPromise;
+    }
+
+    function showFatal(err) {
+      heroContent.innerHTML = "";
+      var isFile = location.protocol === "file:";
+      var html = isFile
+        ? '<p class="md-error">The blog reads its posts over HTTP, so it cannot be opened straight from disk.<br/>' +
+          'Run a local server from the repository root (e.g. <code>python -m http.server</code>) and open the page through it.</p>'
+        : '<p class="md-error">Could not load ' + esc(BLOG_FILE) + ": " + esc(err && err.message || err) + "</p>";
+      view.innerHTML = '<section><div class="wrap">' + html + "</div></section>";
+    }
+
+    /* ── markdown rendering ──────────────────────────────── */
+    function langFromClass(cls) {
+      var m = /(?:^|\s)language-([A-Za-z0-9_\-+]+)/.exec(cls || "");
+      return m ? m[1] : "";
+    }
+
+    function enhanceRendered(el) {
+      // GitHub-style callouts: > [!Note] ...
+      el.querySelectorAll("blockquote").forEach(function (bq) {
+        var first = bq.querySelector(":scope > p");
+        if (!first) return;
+        var t = first.textContent.trim().match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*[\n ]?(.*)$/i);
+        if (!t) return;
+        var type = (t[1] || "note").toLowerCase();
+        var title = t[2] || t[1];
+        var aside = document.createElement("aside");
+        aside.className = "callout " + type;
+        var h = document.createElement("div");
+        h.className = "callout-title";
+        h.textContent = title;
+        aside.appendChild(h);
+        while (bq.firstChild) {
+          var node = bq.firstChild;
+          if (node.nodeType === 1 && node.tagName === "P" && node === first) { first = null; bq.removeChild(node); continue; }
+          aside.appendChild(node);
+        }
+        if (!aside.querySelector("p, ul, ol, pre")) {
+          var p = document.createElement("p");
+          p.textContent = "—";
+          aside.appendChild(p);
+        }
+        bq.parentNode.replaceChild(aside, bq);
+      });
+
+      // wrap tables for horizontal scrolling
+      el.querySelectorAll("table").forEach(function (tb) {
+        var wrap = document.createElement("div");
+        wrap.className = "table-scroll";
+        tb.parentNode.insertBefore(wrap, tb);
+        wrap.appendChild(tb);
+      });
+
+      // code blocks: add a bar with language + copy button
+      el.querySelectorAll("pre").forEach(function (pre) {
+        var code = pre.querySelector("code");
+        var wrap = document.createElement("div");
+        wrap.className = "code-block";
+        pre.parentNode.insertBefore(wrap, pre);
+
+        var bar = document.createElement("div");
+        bar.className = "codebar";
+        var lang = document.createElement("span");
+        lang.className = "code-lang";
+        lang.textContent = code ? (langFromClass(code.className) || "code") : "code";
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "copy-btn";
+        btn.textContent = "Copy";
+        btn.setAttribute("aria-label", "Copy code to clipboard");
+        btn.addEventListener("click", function () {
+          var text = code ? code.textContent : pre.textContent;
+          function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, btn); done(); });
+          } else { fallbackCopy(text, btn); done(); }
+        });
+        bar.appendChild(lang);
+        bar.appendChild(btn);
+        wrap.appendChild(bar);
+        wrap.appendChild(pre);
+      });
+
+      // raw <div align="center"> from model cards → centered div
+      el.querySelectorAll("div").forEach(function (d) {
+        if ((d.getAttribute("align") || "").toLowerCase() === "center") {
+          d.setAttribute("align", "");
+          d.classList.add("center-div");
+        }
+      });
+
+      // heading ids + external links
+      el.querySelectorAll("h2, h3, h4").forEach(function (h, i) {
+        if (!h.id) h.id = "sec-" + i;
+      });
+      el.querySelectorAll("a").forEach(function (a) {
+        var href = a.getAttribute("href") || "";
+        if (/^https?:\/\//i.test(href)) {
+          a.setAttribute("target", "_blank");
+          a.setAttribute("rel", "noopener");
+        }
+      });
+    }
+
+    function renderMarkdown(el, md) {
+      var raw = marked.parse(md, { gfm: true, breaks: false });
+      var clean = DOMPurify.sanitize(raw, { USE_PROFILES: { html: true } });
+      el.innerHTML = clean;
+      enhanceRendered(el);
+      if (window.renderMathInElement) {
+        try {
+          renderMathInElement(el, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "\\[", right: "\\]", display: true },
+              { left: "\\(", right: "\\)", display: false },
+              { left: "$", right: "$", display: false }
+            ],
+            throwOnError: false
+          });
+        } catch (e) { /* leave math as text on failure */ }
+      }
+    }
+
+    function fallbackCopy(text, btn) {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      } catch (e) {}
+    }
+
+    /* ── list view ───────────────────────────────────────── */
+    function tagsHtml(tags) {
+      return (tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
+    }
+
+    function postCard(p) {
+      return (
+        '<a class="post-card" href="#/post/' + encodeURIComponent(p.slug) + '">' +
+          '<div class="post-card-top">' +
+            '<time class="post-date" datetime="' + esc(p.date || "") + '">' + esc(fmtDate(p.date)) + "</time>" +
+            (p.author ? '<span class="post-author">' + esc(p.author) + "</span>" : "") +
+          "</div>" +
+          '<h3 class="post-title">' + esc(p.title) + "</h3>" +
+          (p.subtitle ? '<p class="post-subtitle">' + esc(p.subtitle) + "</p>" : "") +
+          (p.excerpt ? '<p class="post-excerpt">' + esc(p.excerpt) + "</p>" : "") +
+          '<div class="post-card-foot">' +
+            ((p.tags && p.tags.length) ? '<div class="post-tags">' + tagsHtml(p.tags) + "</div>" : "") +
+            '<span class="post-cta">Read article &rarr;</span>' +
+          "</div>" +
+        "</a>"
+      );
+    }
+
+    function renderList() {
+      var b = data.blog || {};
+      var posts = data.posts || [];
+      document.title = (b.title || "Blog") + " — FWKV";
+      heroEl.classList.remove("is-post");
+      setHeroImg(b.hero || "/assets/ascii-art-hero.png", (b.title || "FWKV Blog") + " banner");
+
+      var sorted = posts.slice().sort(function (a, c) { return String(c.date || "").localeCompare(String(a.date || "")); });
+      var latest = sorted[0] && sorted[0].date;
+
+      heroContent.innerHTML =
+        '<p class="hero-eyebrow">FWKV &middot; blog</p>' +
+        "<h1>" + esc(b.title || "Blog") + "</h1>" +
+        (b.description ? '<p class="hero-tagline">' + esc(b.description) + "</p>" : "") +
+        '<div class="hero-meta">' +
+          "<span><strong>" + posts.length + "</strong> post" + (posts.length === 1 ? "" : "s") + "</span>" +
+          (latest ? "<span><strong>latest</strong> " + esc(fmtDate(latest)) + "</span>" : "") +
+        "</div>";
+
+      var body = sorted.map(postCard).join("");
+      view.innerHTML =
+        '<section class="posts-section">' +
+          '<div class="wrap">' +
+            '<p class="section-label">Posts</p>' +
+            '<div class="post-list">' + body + "</div>" +
+            (posts.length === 0 ? '<p class="empty-note">No posts yet — check back soon.</p>' : "") +
+          "</div>" +
+        "</section>";
+      scrollTop();
+    }
+
+    /* ── single post view ────────────────────────────────── */
+    function renderPost(p) {
+      document.title = p.title + " — FWKV Blog";
+      heroEl.classList.add("is-post");
+      setHeroImg(p.hero || "/assets/ascii-art-hero.png", p.title + " banner");
+
+      var readMin = p.readingMinutes && p.readingMinutes > 0
+        ? p.readingMinutes
+        : null;
+
+      heroContent.innerHTML =
+        '<p class="hero-eyebrow">Blog &middot; ' + esc(fmtDate(p.date)) + "</p>" +
+        "<h1>" + esc(p.title) + "</h1>" +
+        (p.subtitle ? '<p class="hero-tagline">' + esc(p.subtitle) + "</p>" : "") +
+        ((p.tags && p.tags.length) ? '<div class="hero-tags">' + tagsHtml(p.tags) + "</div>" : "") +
+        '<div class="hero-meta">' +
+          (p.author ? "<span><strong>" + esc(p.author) + "</strong></span>" : "") +
+          (p.date ? "<span><strong>" + esc(fmtDate(p.date)) + "</strong></span>" : "") +
+          (readMin ? "<span><strong>" + readMin + " min read</strong></span>" : "") +
+        "</div>";
+
+      view.innerHTML =
+        '<section class="post-section">' +
+          '<div class="wrap">' +
+            '<a class="back-link" href="#/">&larr; All posts</a>' +
+            '<article class="md-content" id="articleContent">' +
+              '<p class="md-loading">Loading article&hellip;</p>' +
+            "</article>" +
+            '<div class="post-footer-cta">' +
+              '<a class="btn" href="#/">Back to blog</a>' +
+            "</div>" +
+          "</div>" +
+        "</section>";
+      scrollTop();
+
+      var file = p.contentFile || "content/" + p.slug + ".md";
+      fetch(file, { cache: "no-cache" }).then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.text();
+      }).then(function (md) {
+        var article = $("#articleContent");
+        renderMarkdown(article, md);
+
+        // drop a leading <h1> that duplicates the post title
+        var first = article.querySelector(":scope > :first-child");
+        if (first && first.tagName === "H1" && first.textContent.trim() === p.title) {
+          article.removeChild(first);
+        }
+
+        if (!readMin) {
+          var mins = readingTime(md);
+          var metaSpans = heroContent.querySelectorAll(".hero-meta span");
+          if (metaSpans.length) {
+            var s = document.createElement("span");
+            s.innerHTML = "<strong>" + mins + " min read</strong>";
+            metaSpans[metaSpans.length - 1].parentNode.appendChild(s);
+          }
+        }
+      }).catch(function (err) {
+        var article = $("#articleContent");
+        if (article) article.innerHTML = '<p class="md-error">Could not load the article (' + esc(err && err.message || err) + ").</p>";
+      });
+    }
+
+    /* ── router ──────────────────────────────────────────── */
+    function route() {
+      var slug = slugFromHash();
+      if (!slug) { renderList(); return; }
+      var post = (data.posts || []).filter(function (p) { return p.slug === slug; })[0];
+      if (!post) { renderList(); return; }
+      renderPost(post);
+    }
+
+    window.addEventListener("hashchange", function () {
+      if (!data) return;
+      route();
+    });
+
+    loadBlog().then(function () {
+      route();
+    }).catch(function (err) {
+      showFatal(err);
+    });
+  })();
+  </script>
+</body>
+</html>

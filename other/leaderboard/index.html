@@ -560,6 +560,7 @@
           <ul class="nav-drop-menu">
             <li><a href="../eval/">Eval</a></li>
             <li><a href="#" class="active">Leaderboard</a></li>
+            <li><a href="../blog/">Blog</a></li>
           </ul>
         </li>
         <li><a href="../../chat/">Chat</a></li>
@@ -706,7 +707,7 @@
         <li><a href="https://fwkv.github.io/privacy/"  target="_blank" rel="noopener">Privacy</a></li>
         <li><a href="https://huggingface.co/FWKV" target="_blank" rel="noopener">Models</a></li>
         <li><a href="https://flamef0x.github.io/papers/" target="_blank" rel="noopener">Paper</a></li>
-        <li><a href="https://flamef0x.github.io/blog/" target="_blank" rel="noopener">Blog</a></li>
+        <li><a href="../blog/">Blog</a></li>
       </ul>
     </div>
   </footer>
@@ -754,9 +755,9 @@
           { name: "RWKV-6",  sub: "pure RNN · RWKV Community" },
           { name: "Mamba-2", sub: "pure SSM · Mamba" },
           {
-            name: "Myosotis-1", sub: "pure RNN · FWKV · checkpoint 28000",
+            name: "Myosotis-1-base", sub: "pure RNN · FWKV · final",
             params: "101m", highlight: true, you: true,
-            scores: { hellaswag: 25.73, arc_easy: 34.55, arc_challenge: 21.42, piqa: 57.67 },
+            scores: { hellaswag: 26.21, arc_easy: 34.34, arc_challenge: 21.59, piqa: 55.33 },
           },
           { name: "S4",      sub: "pure SSM · Stanford" },
           { openSlot: true, text: "+ your RNN / SSM model here — submit results below" },
