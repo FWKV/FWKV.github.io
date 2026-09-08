@@ -65,7 +65,6 @@
     banner.setAttribute("aria-hidden", "false");
 
     banner.innerHTML =
-      '<div class="fwkv-cookie-icon" aria-hidden="true">&#127850;</div>' +
       '<p class="fwkv-cookie-text">We use <strong>one cookie</strong> — it only remembers your answer below and is stored <strong>locally in your browser</strong> (we have no server to collect it). No tracking, no ads, no analytics. Do you agree?</p>' +
       '<a class="fwkv-cookie-link" href="' + POLICY_URL + '">Cookie Policy</a>' +
       '<div class="fwkv-cookie-actions">' +

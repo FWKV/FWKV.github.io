@@ -50,13 +50,6 @@
 
 #fwkv-cookie-banner[aria-hidden="true"] { pointer-events: none; }
 
-.fwkv-cookie-icon {
-  font-size: 1.05rem;
-  line-height: 1;
-  filter: grayscale(0.15);
-  user-select: none;
-}
-
 .fwkv-cookie-text {
   margin: 0;
   flex: 1 1 300px;
