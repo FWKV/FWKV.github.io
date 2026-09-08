@@ -1,0 +1,127 @@
+/* ────────────────────────────────────────────────────────────
+   FWKV · Cookie consent banner
+   Slim, fixed bottom-center. Shared across all pages.
+   Falls back to concrete values if a page lacks the CSS tokens.
+   ──────────────────────────────────────────────────────────── */
+
+#fwkv-cookie-banner {
+  /* local fallbacks (mirror site tokens) */
+  --cbg:    rgba(12, 14, 20, 0.94);
+  --cbor:   #1c2333;
+  --ctext:  #d8e0ec;
+  --cmuted: #7a8ba0;
+  --cblue:  #6ba8e0;
+  --ccyan:  #8ec8f0;
+
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%) translateY(14px);
+  z-index: 1000000;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.9rem;
+
+  max-width: min(880px, calc(100vw - 1.5rem));
+  padding: 0.6rem 0.7rem 0.6rem 0.8rem;
+
+  background: var(--bg-elevated, var(--cbg));
+  border: 1px solid var(--border, var(--cbor));
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  color: var(--text, var(--ctext));
+  font-family: var(--font-sans, "IBM Plex Sans", system-ui, sans-serif);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+}
+
+#fwkv-cookie-banner.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+#fwkv-cookie-banner[aria-hidden="true"] { pointer-events: none; }
+
+.fwkv-cookie-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  filter: grayscale(0.15);
+  user-select: none;
+}
+
+.fwkv-cookie-text {
+  margin: 0;
+  flex: 1 1 300px;
+  min-width: 220px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text-muted, var(--cmuted));
+}
+
+.fwkv-cookie-text strong { color: var(--text, var(--ctext)); font-weight: 600; }
+
+.fwkv-cookie-link {
+  font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--blue-bright, var(--cblue));
+  white-space: nowrap;
+  text-underline-offset: 3px;
+}
+.fwkv-cookie-link:hover { color: var(--cyan, var(--ccyan)); }
+
+.fwkv-cookie-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fwkv-cookie-btn {
+  font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  padding: 0.48rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.fwkv-cookie-btn:active { transform: translateY(1px); }
+.fwkv-cookie-btn:focus-visible { outline: 2px solid var(--blue, #3d7ab5); outline-offset: 2px; }
+
+/* "Yes" — accept */
+.fwkv-cookie-btn.yes {
+  background: var(--blue, #3d7ab5);
+  border-color: var(--blue, #3d7ab5);
+  color: var(--white, #f0f4fa);
+}
+.fwkv-cookie-btn.yes:hover {
+  background: var(--blue-bright, #6ba8e0);
+  border-color: var(--blue-bright, #6ba8e0);
+  color: #06070a;
+}
+
+/* "Fuck no" — refuse */
+.fwkv-cookie-btn.no {
+  background: transparent;
+  border-color: rgba(255, 107, 107, 0.45);
+  color: #ff6b6b;
+}
+.fwkv-cookie-btn.no:hover {
+  background: rgba(255, 107, 107, 0.12);
+  border-color: rgba(255, 107, 107, 0.8);
+  color: #ff9292;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #fwkv-cookie-banner { transition: none; }
+}
