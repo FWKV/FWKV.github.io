@@ -1022,7 +1022,7 @@
 
       for (const turn of turns) {
         if (turn.role === "user") {
-          prompt += `User: ${turn.content}\n\n`;
+          prompt += `Human: ${turn.content}\n\n`;
         } else if (turn.role === "assistant") {
           prompt += `Assistant: ${turn.content}\n\n`;
         }
