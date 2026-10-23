@@ -1034,7 +1034,7 @@
 
     function cleanTinyGPTReply(raw) {
       let out = String(raw ?? "").trim();
-      const nextTurn = out.search(/\n\s*User:/);
+      const nextTurn = out.search(/\n\s*Human:/);
       if (nextTurn !== -1) out = out.slice(0, nextTurn).trim();
       out = out.replace(/^Assistant:\s*/i, "");
       return out;
